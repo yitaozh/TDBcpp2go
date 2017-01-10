@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/TDB.iml" filepath="$PROJECT_DIR$/TDB.iml" />
+      <module fileurl="file://$PROJECT_DIR$/TDBcpp2go.iml" filepath="$PROJECT_DIR$/TDBcpp2go.iml" />
     </modules>
   </component>
 </project>
