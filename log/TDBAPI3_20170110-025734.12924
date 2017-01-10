@@ -1,0 +1,7 @@
+Log file created at: 2017/01/10 02:57:34
+Running on machine: ubuntu
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I0110 02:57:34.914574 12924 HHNetFrameProcessor_TDBAPI.cpp:188] Connect Success，login...
+I0110 02:57:34.914716 12924 HHNetFrameProcessor_TDBAPI.cpp:260] login...User:TD3446699201;Pwd:43449560
+E0110 02:57:34.939494 12928 HHNetFrameProcessor_TDBAPI.cpp:328] login failed,ErrInfo(TDB_LOGIN_FAILED):用户名或密码错误!
+E0110 02:57:34.940826 12924 TDBAPI.cpp:210] Login Fail,reason:用户名或密码错误!
