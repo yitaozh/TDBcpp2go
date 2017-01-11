@@ -1,7 +1,7 @@
 #ifndef _TDBAPI_H_
 #define _TDBAPI_H_
 
-#include "/home/edol/workstation/TDBcpp2go/include/TDBAPIStruct.h"
+#include "TDBAPIStruct.h"
 
 #if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64) || defined(_WINDOWS)
 #define __PLATFORM_WINDOWS__

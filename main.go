@@ -16,27 +16,28 @@ import (
 func main(){
 	var hTdb C.THANDLE = nil
 
+
 	var settings C.OPEN_SETTINGS
 
 	//================================================
-	bytes1 := []byte("114.80.154.34")
-	for i:=0 ;i<len(bytes1) ;i++{
-		settings.szIP[i]=C.char(bytes1[i])
+	settings_bytes1 := []byte("114.80.154.34")
+	for i:=0 ;i<len(settings_bytes1) ;i++{
+		settings.szIP[i]=C.char(settings_bytes1[i])
 	}
 	//================================================
-	bytes2 := []byte("6271")
-	for i:=0 ;i<len(bytes2) ;i++{
-		settings.szPort[i]=C.char(bytes2[i])
+	settings_bytes2 := []byte("6271")
+	for i:=0 ;i<len(settings_bytes2) ;i++{
+		settings.szPort[i]=C.char(settings_bytes2[i])
 	}
 	//================================================
-	bytes3 := []byte("TD3446699201")
-	for i:=0 ;i<len(bytes3) ;i++{
-		settings.szUser[i]=C.char(bytes3[i])
+	settings_bytes3 := []byte("TD3446699201")
+	for i:=0 ;i<len(settings_bytes3) ;i++{
+		settings.szUser[i]=C.char(settings_bytes3[i])
 	}
 	//================================================
-	bytes4 := []byte("43449560")
-	for i:=0 ;i<len(bytes4) ;i++{
-		settings.szPassword[i]=C.char(bytes4[i])
+	settings_bytes4 := []byte("43449560")
+	for i:=0 ;i<len(settings_bytes4) ;i++{
+		settings.szPassword[i]=C.char(settings_bytes4[i])
 	}
 	//================================================
 
@@ -44,23 +45,43 @@ func main(){
 	settings.nRetryGap = 1
 	settings.nTimeOutVal = 1
 
+
 	//proxy
 
-	/*var proxy_setting C.TDB_PROXY_SETTING
-	proxy_setting.nProxyType = TDB_PROXY_TYPE.TDB_PROXY_HTTP11
-	C.strcpy(proxy_setting.szProxyHostIp, C.CString("10.100.3.42"))
-	C.strcpy(proxy_setting.szProxyPort, C.CString("12345"))
-	C.strcpy(proxy_setting.szProxyUser, C.CString("1"))
-	C.strcpy(proxy_setting.szProxyPwd, C.CString("1"))
-	*/
+	var proxy_setting C.TDB_PROXY_SETTING
+	proxy_setting.nProxyType = C.TDB_PROXY_HTTP11
+	fmt.Println("aaa")
+	//================================================
+	proxy_bytes1 := []byte("10.100.3.42")
+	for i:=0 ;i<len(proxy_bytes1) ;i++{
+		proxy_setting.szProxyHostIp[i]=C.char(proxy_bytes1[i])
+	}
+	//================================================
+	proxy_bytes2 := []byte("12345")
+	for i:=0 ;i<len(proxy_bytes2) ;i++{
+		proxy_setting.szProxyPort[i]=C.char(proxy_bytes2[i])
+	}
+	//================================================
+	proxy_bytes3 := []byte("1")
+	for i:=0 ;i<len(proxy_bytes3) ;i++{
+		proxy_setting.szProxyUser[i]=C.char(proxy_bytes3[i])
+	}
+	//================================================
+	proxy_bytes4 := []byte("1")
+	for i:=0 ;i<len(proxy_bytes4) ;i++{
+		proxy_setting.szProxyPwd[i]=C.char(proxy_bytes4[i])
+	}
+	//================================================
+	fmt.Println("aaa")
 	var LoginRes C.TDBDefine_ResLogin
 	//TDB_OpenProxy
-	//hTdb = TDB_OpenProxy(&settings, &proxy_settings, &LoginRes)
+	//hTdb = C.TDB_OpenProxy(&settings, &proxy_setting, &LoginRes)
 
 	hTdb = C.TDB_Open(&settings, &LoginRes)
-
+	//fmt.Println("aaa")
 	if hTdb == nil {
 		fmt.Println("连接失败！")
+		return
 	}
 
 	//TDB_GetCOdeInfo
