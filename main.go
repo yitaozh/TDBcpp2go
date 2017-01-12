@@ -21,21 +21,21 @@ func main(){
 
 	//================================================
 	settings_bytes1 := []byte("114.80.154.34")
-	for i:=0 ;i<len(settings_bytes1) ;i++{
+	for i:=0; i<len(settings_bytes1); i++{
 		settings.szIP[i]=C.char(settings_bytes1[i])
 	}
 	//================================================
-	settings_bytes2 := []byte("6271")
+	settings_bytes2 := []byte("6261")
 	for i:=0 ;i<len(settings_bytes2) ;i++{
 		settings.szPort[i]=C.char(settings_bytes2[i])
 	}
 	//================================================
-	settings_bytes3 := []byte("TD3446699201")
+	settings_bytes3 := []byte("TD3446699001")
 	for i:=0 ;i<len(settings_bytes3) ;i++{
 		settings.szUser[i]=C.char(settings_bytes3[i])
 	}
 	//================================================
-	settings_bytes4 := []byte("43449560")
+	settings_bytes4 := []byte("43449360")
 	for i:=0 ;i<len(settings_bytes4) ;i++{
 		settings.szPassword[i]=C.char(settings_bytes4[i])
 	}
@@ -47,10 +47,10 @@ func main(){
 
 
 	//proxy
-
+/*
 	var proxy_setting C.TDB_PROXY_SETTING
 	proxy_setting.nProxyType = C.TDB_PROXY_HTTP11
-	fmt.Println("aaa")
+
 	//================================================
 	proxy_bytes1 := []byte("10.100.3.42")
 	for i:=0 ;i<len(proxy_bytes1) ;i++{
@@ -72,7 +72,7 @@ func main(){
 		proxy_setting.szProxyPwd[i]=C.char(proxy_bytes4[i])
 	}
 	//================================================
-	fmt.Println("aaa")
+	*/
 	var LoginRes C.TDBDefine_ResLogin
 	//TDB_OpenProxy
 	//hTdb = C.TDB_OpenProxy(&settings, &proxy_setting, &LoginRes)
@@ -87,5 +87,9 @@ func main(){
 	//TDB_GetCOdeInfo
 	var pCode *C.TDBDefine_Code
 	pCode = C.TDB_GetCodeInfo(hTdb, C.CString("000001.SZ"), C.CString("SZ-2-0"))
-	fmt.Printf("交易所代码 chWindCode:%s \n", pCode.chCode)
+	var code_byte = [32]byte{}
+	for i:=0; i<len(pCode.chCode); i++ {
+		code_byte[i] = byte(pCode.chCode[i])
+	}
+	fmt.Printf("交易所代码 chWindCode:%s \n", code_byte)
 }
