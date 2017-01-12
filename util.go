@@ -8,6 +8,7 @@ import "C"
 import (
 	"fmt"
 	"time"
+	"unsafe"
 )
 
 func GetTickCount() int64 {
@@ -45,9 +46,20 @@ func GetCodeTable(hTdb C.THANDLE, szMarket string)  {
 	fmt.Println("---------------------------Code Table--------------------")
 	fmt.Printf("收到代码表项数：%d，\n\n",pCount)
 	//输出
+	tmpPtr := uintptr(unsafe.Pointer(pCodetable))
+	sizeOf := unsafe.Sizeof(*pCodetable)
 	if outPutTable {
 		for i:=0; i<pCount; i++ {
-			fmt.Printf("交易所代码 chWindCode:%s \n", pCodetable[i].chCode)
+			pCt := (*C.struct_TDBDefine_Code)(unsafe.Pointer(tmpPtr))
+			fmt.Printf("交易所代码 chWindCode:%s \n", pCt.chCode)
+
+			tmpPtr += sizeOf
+
 		}
 	}
 }
+
+func GetKData(hTdb C.THANDLE, szCode string, szMarket string, nBeginDate int, nEndDate int, nCycle int, nUserDef int, nCQFlag int, nAutoComplete int) {
+
+}
+

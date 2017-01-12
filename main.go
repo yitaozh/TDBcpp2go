@@ -11,6 +11,7 @@ import "C"
 
 import (
 	"fmt"
+	"unsafe"
 )
 
 func main(){
@@ -92,4 +93,22 @@ func main(){
 		code_byte[i] = byte(pCode.chCode[i])
 	}
 	fmt.Printf("交易所代码 chWindCode:%s \n", code_byte)
+
+
+	var pCount C.int = 0
+	C.TDB_GetCodeTable(hTdb,C.CString("SZ"),&pCode,&pCount);
+	tmpPtr := uintptr(unsafe.Pointer(pCode))
+	sizeOf := unsafe.Sizeof(*pCode)
+	if pCount!=0 && pCode!=nil{
+		for i := 0; i < 2; i++{
+		pC := (*C.TDBDefine_Code)(unsafe.Pointer(tmpPtr))
+		fmt.Println("-------------code table ----------------------------");
+		fmt.Printf("chWindCode:%s \n", pC.chCode);
+		fmt.Printf("chWindCode:%s \n", pC.chMarket);
+		fmt.Printf("chWindCode:%s \n", pC.chCNName);
+		fmt.Printf("chWindCode:%s \n", pC.chENName);
+		fmt.Printf("chWindCode:%s \n", pC.nType);
+		tmpPtr += sizeOf
+		}
+	}
 }
