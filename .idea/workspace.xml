@@ -2,8 +2,31 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="27bfee24-76ea-4222-bf0b-75d7dcc727fb" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/log/TDBAPI3_20170110-012637.9201" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/log/TDBAPI3_20170110-012821.9284" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/log/TDBAPI3_20170110-020337.10506" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/log/TDBAPI3_20170110-022816.11360" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/log/TDBAPI3_20170110-024728.12221" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/log/TDBAPI3_20170110-024754.12281" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/log/TDBAPI3_20170110-024803.12342" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/log/TDBAPI3_20170110-025516.12595" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/log/TDBAPI3_20170110-025734.12924" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/log/TDBAPI3_20170110-025924.13006" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/log/TDBAPI3_20170111-200201.5518" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/log/TDBAPI3_20170111-214505.3437" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/log/TDBAPI3_20170111-214654.3532" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/log/TDBAPI3_20170111-214736.3602" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/log/TDBAPI3_20170111-214848.3680" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/log/TDBAPI3_20170111-214909.3753" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/log/TDBAPI3_20170111-214927.3825" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/log/TDBAPI3_20170111-215004.3897" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/log/TDBAPI3_20170112-125344.6531" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/log/TDBAPI3_20170112-132353.6962" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/log/TDBAPI3_20170112-171116.8905" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/log/TDBAPI3_20170112-174626.9987" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/log/TDBAPI3_20170112-174722.10058" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README.md" afterPath="$PROJECT_DIR$/README.md" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/main.go" afterPath="$PROJECT_DIR$/main.go" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/util.go" afterPath="$PROJECT_DIR$/util.go" />
     </list>
@@ -32,11 +55,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="main.go" pinned="false" current-in-tab="true">
+      <file leaf-file-name="main.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/main.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="494">
-              <caret line="29" column="8" lean-forward="false" selection-start-line="29" selection-start-column="8" selection-end-line="29" selection-end-column="8" />
+            <state relative-caret-position="1482">
+              <caret line="78" column="0" lean-forward="false" selection-start-line="78" selection-start-column="0" selection-end-line="78" selection-end-column="0" />
               <folding>
                 <element signature="e#154#193#0" expanded="true" />
               </folding>
@@ -47,20 +70,20 @@
       <file leaf-file-name="TDBAPI.cpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/TDBAPI.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="887">
+            <state relative-caret-position="602">
               <caret line="238" column="54" lean-forward="false" selection-start-line="238" selection-start-column="54" selection-end-line="238" selection-end-column="54" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="util.go" pinned="false" current-in-tab="false">
+      <file leaf-file-name="util.go" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/util.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="773">
-              <caret line="74" column="54" lean-forward="false" selection-start-line="74" selection-start-column="54" selection-end-line="74" selection-end-column="54" />
+            <state relative-caret-position="376">
+              <caret line="31" column="43" lean-forward="false" selection-start-line="31" selection-start-column="31" selection-end-line="31" selection-end-column="43" />
               <folding>
-                <element signature="e#63#109#0" expanded="true" />
+                <element signature="e#63#120#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -79,8 +102,8 @@
       <file leaf-file-name="TDBAPIStruct.h" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/include/TDBAPIStruct.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="260">
-              <caret line="71" column="32" lean-forward="true" selection-start-line="71" selection-start-column="32" selection-end-line="71" selection-end-column="32" />
+            <state relative-caret-position="241">
+              <caret line="136" column="26" lean-forward="false" selection-start-line="136" selection-start-column="20" selection-end-line="136" selection-end-column="26" />
               <folding />
             </state>
           </provider>
@@ -131,6 +154,7 @@
       <find>open</find>
       <find>reason</find>
       <find>TDB_PROXY_TYPE</find>
+      <find>nCQFla</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -155,8 +179,8 @@
         <option value="/usr/include/TDBAPI.h" />
         <option value="$PROJECT_DIR$/include/TDBAPI.h" />
         <option value="$PROJECT_DIR$/log/TDBAPI3_20170112-125344.6531" />
-        <option value="$PROJECT_DIR$/util.go" />
         <option value="$PROJECT_DIR$/include/TDBAPIStruct.h" />
+        <option value="$PROJECT_DIR$/util.go" />
         <option value="$PROJECT_DIR$/main.go" />
       </list>
     </option>
@@ -200,20 +224,6 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="TDBcpp2go" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="TDBcpp2go" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="TDBcpp2go" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="log" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -696,7 +706,7 @@
       <workItem from="1484186195216" duration="4942000" />
       <workItem from="1484196234502" duration="3218000" />
       <workItem from="1484211464494" duration="4016000" />
-      <workItem from="1484272884298" duration="2332000" />
+      <workItem from="1484272884298" duration="10341000" />
     </task>
     <task id="LOCAL-00001" summary="1.5 version">
       <created>1484049817841</created>
@@ -709,7 +719,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="43671000" />
+    <option name="totallyTimeSpent" value="51680000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -732,7 +742,7 @@
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.15062761" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.17677824" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33577406" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Properties" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3291536" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
@@ -1044,7 +1054,6 @@
       </provider>
     </entry>
     <entry file="file:///usr/lib/go-1.6/src/runtime/proc.go" />
-    <entry file="file:///usr/lib/go-1.6/src/runtime/panic.go" />
     <entry file="file://$PROJECT_DIR$/TDB.iml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -1123,24 +1132,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/TDBAPI.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="887">
-          <caret line="238" column="54" lean-forward="false" selection-start-line="238" selection-start-column="54" selection-end-line="238" selection-end-column="54" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/util.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="773">
-          <caret line="74" column="54" lean-forward="false" selection-start-line="74" selection-start-column="54" selection-end-line="74" selection-end-column="54" />
-          <folding>
-            <element signature="e#63#109#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/include/TDBAPI.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="57">
@@ -1149,20 +1140,46 @@
         </state>
       </provider>
     </entry>
+    <entry file="file:///usr/lib/go-1.6/src/runtime/panic.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="252">
+          <caret line="480" column="0" lean-forward="false" selection-start-line="480" selection-start-column="0" selection-end-line="480" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/TDBAPI.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="602">
+          <caret line="238" column="54" lean-forward="false" selection-start-line="238" selection-start-column="54" selection-end-line="238" selection-end-column="54" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/include/TDBAPIStruct.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="260">
-          <caret line="71" column="32" lean-forward="true" selection-start-line="71" selection-start-column="32" selection-end-line="71" selection-end-column="32" />
+        <state relative-caret-position="241">
+          <caret line="136" column="26" lean-forward="false" selection-start-line="136" selection-start-column="20" selection-end-line="136" selection-end-column="26" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/main.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="494">
-          <caret line="29" column="8" lean-forward="false" selection-start-line="29" selection-start-column="8" selection-end-line="29" selection-end-column="8" />
+        <state relative-caret-position="1482">
+          <caret line="78" column="0" lean-forward="false" selection-start-line="78" selection-start-column="0" selection-end-line="78" selection-end-column="0" />
           <folding>
             <element signature="e#154#193#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/util.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="376">
+          <caret line="31" column="43" lean-forward="false" selection-start-line="31" selection-start-column="31" selection-end-line="31" selection-end-column="43" />
+          <folding>
+            <element signature="e#63#120#0" expanded="true" />
           </folding>
         </state>
       </provider>

@@ -1,5 +1,0 @@
-Log file created at: 2017/01/10 02:28:16
-Running on machine: ubuntu
-Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
-I0110 02:28:16.719724 11360 HHNetFrameProcessor_TDBAPI.cpp:27] ~CHHNetFrameProcessor_TDBAPI()
-E0110 02:28:16.719981 11360 TDBAPI.cpp:200] Failed to Connect TDB Server.IP£º114.80.154.34;Port£º€HL

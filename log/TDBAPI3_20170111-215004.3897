@@ -1,7 +1,0 @@
-Log file created at: 2017/01/11 21:50:04
-Running on machine: Lenovo
-Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
-I0111 21:50:04.539194  3897 HHNetFrameProcessor_TDBAPI.cpp:188] Connect Success，login...
-I0111 21:50:04.539417  3897 HHNetFrameProcessor_TDBAPI.cpp:260] login...User:TD3446699201;Pwd:43449560
-E0111 21:50:04.655001  3901 HHNetFrameProcessor_TDBAPI.cpp:328] login failed,ErrInfo(TDB_LOGIN_FAILED):用户名或密码错误!
-E0111 21:50:04.656199  3897 TDBAPI.cpp:210] Login Fail,reason:用户名或密码错误!

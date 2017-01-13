@@ -1,4 +1,0 @@
-Log file created at: 2017/01/11 21:49:09
-Running on machine: Lenovo
-Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
-I0111 21:49:09.571472  3753 TDBAPI.cpp:239] Open 114.80.154.34:6271 with proxy 10.100.3.42:12345
