@@ -14,6 +14,14 @@ import (
 	"unsafe"
 )
 
+func string2char(str string, des uintptr, sizeOf uintptr){
+	bytes := []byte(str)
+	for i:=0; i<len(bytes); i++{
+		unit := (*C.char)(unsafe.Pointer(des))
+		*unit = C.char(bytes[i])
+		des += sizeOf
+	}
+}
 func main(){
 	var hTdb C.THANDLE = nil
 
@@ -21,10 +29,13 @@ func main(){
 	var settings C.OPEN_SETTINGS
 
 	//================================================
+	/*
 	settings_bytes1 := []byte("114.80.154.34")
 	for i:=0; i<len(settings_bytes1); i++{
 		settings.szIP[i]=C.char(settings_bytes1[i])
 	}
+	*/
+	string2char("114.80.154.34",uintptr(unsafe.Pointer(&settings.szIP)),unsafe.Sizeof(settings.szIP[1]))
 	//================================================
 	settings_bytes2 := []byte("6261")
 	for i:=0 ;i<len(settings_bytes2) ;i++{
@@ -97,7 +108,7 @@ func main(){
 
 	var pCount C.int = 0
 	C.TDB_GetCodeTable(hTdb,C.CString("SZ"),&pCode,&pCount);
-	tmpPtr := uintptr(unsafe.Pointer(pCode))
+	/*tmpPtr := uintptr(unsafe.Pointer(pCode))
 	sizeOf := unsafe.Sizeof(*pCode)
 	if pCount!=0 && pCode!=nil{
 		for i := 0; i < 2; i++{
@@ -110,5 +121,5 @@ func main(){
 		fmt.Printf("chWindCode:%s \n", pC.nType);
 		tmpPtr += sizeOf
 		}
-	}
+	}*/
 }
