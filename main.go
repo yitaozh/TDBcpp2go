@@ -22,44 +22,32 @@ func string2char(str string, des uintptr, sizeOf uintptr){
 		des += sizeOf
 	}
 }
+
+func char2byte(des uintptr, sizeOf uintptr, leng int)[128]byte{
+	var bytes [128]byte
+	for i:=0; i < leng; i++ {
+		unit := (*C.char)(unsafe.Pointer(des))
+		bytes[i] = byte(*unit)
+		des += sizeOf
+	}
+	return bytes
+}
+
 func main(){
 	var hTdb C.THANDLE = nil
 
 
 	var settings C.OPEN_SETTINGS
 
-	//================================================
-	/*
-	settings_bytes1 := []byte("114.80.154.34")
-	for i:=0; i<len(settings_bytes1); i++{
-		settings.szIP[i]=C.char(settings_bytes1[i])
-	}
-	*/
 	string2char("114.80.154.34",uintptr(unsafe.Pointer(&settings.szIP)),unsafe.Sizeof(settings.szIP[1]))
-	//================================================
-	settings_bytes2 := []byte("6261")
-	for i:=0 ;i<len(settings_bytes2) ;i++{
-		settings.szPort[i]=C.char(settings_bytes2[i])
-	}
-	//================================================
-	settings_bytes3 := []byte("TD3446699001")
-	for i:=0 ;i<len(settings_bytes3) ;i++{
-		settings.szUser[i]=C.char(settings_bytes3[i])
-	}
-	//================================================
-	settings_bytes4 := []byte("43449360")
-	for i:=0 ;i<len(settings_bytes4) ;i++{
-		settings.szPassword[i]=C.char(settings_bytes4[i])
-	}
-	//================================================
-
+	string2char("6261",uintptr(unsafe.Pointer(&settings.szPort)),unsafe.Sizeof(settings.szPort[1]))
+	string2char("TD3446699001",uintptr(unsafe.Pointer(&settings.szUser)),unsafe.Sizeof(settings.szUser[1]))
+	string2char("43449360",uintptr(unsafe.Pointer(&settings.szPassword)),unsafe.Sizeof(settings.szPassword[1]))
 	settings.nRetryCount = 15
 	settings.nRetryGap = 1
 	settings.nTimeOutVal = 1
-
-
+	/*
 	//proxy
-/*
 	var proxy_setting C.TDB_PROXY_SETTING
 	proxy_setting.nProxyType = C.TDB_PROXY_HTTP11
 
@@ -85,6 +73,7 @@ func main(){
 	}
 	//================================================
 	*/
+
 	var LoginRes C.TDBDefine_ResLogin
 	//TDB_OpenProxy
 	//hTdb = C.TDB_OpenProxy(&settings, &proxy_setting, &LoginRes)
@@ -99,16 +88,11 @@ func main(){
 	//TDB_GetCOdeInfo
 	var pCode *C.TDBDefine_Code
 	pCode = C.TDB_GetCodeInfo(hTdb, C.CString("000001.SZ"), C.CString("SZ-2-0"))
-	var code_byte = [32]byte{}
-	for i:=0; i<len(pCode.chCode); i++ {
-		code_byte[i] = byte(pCode.chCode[i])
-	}
-	fmt.Printf("交易所代码 chWindCode:%s \n", code_byte)
-
+	fmt.Printf("交易所代码 chWindCode:%s \n", char2byte(uintptr(unsafe.Pointer(&pCode.chCode)),unsafe.Sizeof(pCode.chCode[1]),len(pCode.chCode)))
 
 	var pCount C.int = 0
 	C.TDB_GetCodeTable(hTdb,C.CString("SZ"),&pCode,&pCount);
-	/*tmpPtr := uintptr(unsafe.Pointer(pCode))
+	tmpPtr := uintptr(unsafe.Pointer(pCode))
 	sizeOf := unsafe.Sizeof(*pCode)
 	if pCount!=0 && pCode!=nil{
 		for i := 0; i < 2; i++{
@@ -121,5 +105,5 @@ func main(){
 		fmt.Printf("chWindCode:%s \n", pC.nType);
 		tmpPtr += sizeOf
 		}
-	}*/
+	}
 }
