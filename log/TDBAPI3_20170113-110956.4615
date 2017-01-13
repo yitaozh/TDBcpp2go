@@ -1,0 +1,11 @@
+Log file created at: 2017/01/13 11:09:56
+Running on machine: pjh-vm
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I0113 11:09:56.430886  4615 HHNetFrameProcessor_TDBAPI.cpp:188] Connect Success£¬login...
+I0113 11:09:56.431134  4615 HHNetFrameProcessor_TDBAPI.cpp:260] login...User:TD3446699001;Pwd:43449360
+I0113 11:09:56.478127  4619 HHNetFrameProcessor_TDBAPI.cpp:360] login success£¬requesting codetable!
+I0113 11:09:56.478174  4619 HHNetFrameProcessor_TDBAPI.cpp:369] requesting codetable...market:SH-2-0
+I0113 11:09:56.478231  4619 HHNetFrameProcessor_TDBAPI.cpp:369] requesting codetable...market:SZ-2-0
+I0113 11:09:59.409145  4619 HHNetFrameProcessor_TDBAPI.cpp:384] codetable arrived! Market£ºSH-2-0
+I0113 11:10:02.271399  4619 HHNetFrameProcessor_TDBAPI.cpp:384] codetable arrived! Market£ºSZ-2-0
+I0113 11:10:02.282851  4615 HHNetFrameProcessor_TDBAPI.cpp:539] requesting code information, code: 000001.SZmarket:SZ-2-0
