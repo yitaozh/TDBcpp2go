@@ -14,19 +14,6 @@ import (
 
 )
 
-func main()  {
-	fmt.Println("hello world")
-}
-
-func copystr(str string, des uintptr, sizeOf uintptr, len int) { //len需要去TDBStruct.h里查看
-	bytes := []byte(str)
-	for i:=0; i<len; i++ {
-		unit := (*C.char)(unsafe.Pointer(des))
-		*unit = C.char(bytes[i])
-		des += sizeOf
-	}
-}
-
 
 func GetTickCount() int64 {
 	return time.Now().Unix()
@@ -87,13 +74,13 @@ func GetCodeTable(hTdb C.THANDLE, szMarket string)  {
 			tmpPtr += sizeOf
 		}
 	}
-	C.TDB_Free(pCodetable)
-}
 
+}
+/*
 func GetKData(hTdb C.THANDLE, szCode string, szMarket string, nBeginDate int, nEndDate int, nCycle int, nUserDef int, nCQFlag int, nAutoComplete int) {
 	var req *C.TDBDefine_ReqKLine = new(C.TDBDefine_ReqKLine)
-	copystr(szCode, uintptr(unsafe.Pointer(&req.chCode)), unsafe.Sizeof(req.chCode[0]), 32)
-	copystr(szMarket, uintptr(unsafe.Pointer(&req.chMarketKey)), unsafe.Sizeof(req.chMarketKey[0]), 24)
+	String2char(szCode,uintptr(unsafe.Pointer(&req.chCode)),unsafe.Sizeof(req.chCode[0]))
+	String2char(szMarketKey,uintptr(unsafe.Pointer(&req.chMarketKey)),unsafe.Sizeof(req.chMarketKey[0]))
 	//req.nCQFlag = C.REFILLFLAG(nCQFlag)  //除权标志，由用户定义
 	req.nBeginDate = C.int(nBeginDate)  //开始日期
 	req.nEndDate = C.int(nEndDate)//结束日期
@@ -121,14 +108,14 @@ func GetKData(hTdb C.THANDLE, szCode string, szMarket string, nBeginDate int, nE
 		i += 100
 	}
 
-	C.TDB_Free(kLine)
+
 }
 
 
 func GetTickData(hTdb C.THANDLE, szCode string, szMarket string, nDate int)  {
 	var req C.TDBDefine_ReqTick
-	copystr(szCode, uintptr(unsafe.Pointer(&req.chCode)), unsafe.Sizeof(req.chCode[0]), 32)
-	copystr(szMarket, uintptr(unsafe.Pointer(&req.chMarketKey)), unsafe.Sizeof(req.chMarketKey[0]), 24)
+	String2char(szCode,uintptr(unsafe.Pointer(&req.chCode)),unsafe.Sizeof(req.chCode[0]))
+	String2char(szMarketKey,uintptr(unsafe.Pointer(&req.chMarketKey)),unsafe.Sizeof(req.chMarketKey[0]))
 
 	req.nDate = C.int(nDate)
 	req.nBeginTime = 0
@@ -180,34 +167,34 @@ func GetTickData(hTdb C.THANDLE, szCode string, szMarket string, nDate int)  {
 		fmt.Printf("叫卖总量 iTotalAskVolume:%v \n", pT.iTotalAskVolume)
 		fmt.Printf("叫买总量 iTotalBidVolume:%v \n", pT.iTotalBidVolume)
 
-/*
+
 		//期货字段
-		fmt.Printf("结算价 nSettle:%d \n", pT.nSettle)
-		fmt.Printf("持仓量 nPosition:%d \n", pT.nPosition)
-		fmt.Printf("虚实度 nCurDelta:%d \n", pT.nCurDelta)
-		fmt.Printf("昨结算 nPreSettle:%d \n", pT.nPreSettle)
-		fmt.Printf("昨持仓 nPrePosition:%d \n", pT.nPrePosition)
+//		fmt.Printf("结算价 nSettle:%d \n", pT.nSettle)
+//		fmt.Printf("持仓量 nPosition:%d \n", pT.nPosition)
+//		fmt.Printf("虚实度 nCurDelta:%d \n", pT.nCurDelta)
+//		fmt.Printf("昨结算 nPreSettle:%d \n", pT.nPreSettle)
+//		fmt.Printf("昨持仓 nPrePosition:%d \n", pT.nPrePosition)
 
 		//指数
-		fmt.Printf("不加权指数 nIndex:%d \n", pT.nIndex)
-		fmt.Printf("品种总数 nStocks:%d \n", pT.nStocks)
-		fmt.Printf("上涨品种数 nUps:%d \n", pT.nUps)
-		fmt.Printf("下跌品种数 nDowns:%d \n", pT.nDowns)
-		fmt.Printf("持平品种数 nHoldLines:%d \n", pT.nHoldLines)
-		*/
+//		fmt.Printf("不加权指数 nIndex:%d \n", pT.nIndex)
+//		fmt.Printf("品种总数 nStocks:%d \n", pT.nStocks)
+//		fmt.Printf("上涨品种数 nUps:%d \n", pT.nUps)
+//		fmt.Printf("下跌品种数 nDowns:%d \n", pT.nDowns)
+//		fmt.Printf("持平品种数 nHoldLines:%d \n", pT.nHoldLines)
+
 
 		fmt.Println("-------------------------------")
 		i += 100
 		tmpPtr += sizeOf*100
 	}
-	C.TDB_Free(pTick) //释放
+
 }
 
 
 func GetTransaction(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int)  {
 	var req C.TDBDefine_ReqTransaction
-	copystr(szCode, uintptr(unsafe.Pointer(&req.chCode)), unsafe.Sizeof(req.chCode[0]), 32)
-	copystr(szMarketKey, uintptr(unsafe.Pointer(&req.chMarketKey)), unsafe.Sizeof(req.chMarketKey[0]), 24)
+	String2char(szCode,uintptr(unsafe.Pointer(&req.chCode)),unsafe.Sizeof(req.chCode[0]))
+	String2char(szMarketKey,uintptr(unsafe.Pointer(&req.chMarketKey)),unsafe.Sizeof(req.chMarketKey[0]))
 	req.nDate = C.int(nDate)
 	req.nBeginTime = 0
 	req.nEndTime = 0
@@ -236,14 +223,14 @@ func GetTransaction(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int
 		i += 10000
 		tmpPtr += sizeOf*10000
 	}
-	C.TDB_Free(pTransaction)
+
 }
-/*
+
 
 func getOrder(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int)  {
 	var req C.TDBDefine_ReqOrder
-	copystr(szCode, uintptr(unsafe.Pointer(&req.chCode)), unsafe.Sizeof(req.chCode[0]), 32)
-	copystr(szMarketKey, uintptr(unsafe.Pointer(&req.chMarketKey)), unsafe.Sizeof(req.chMarketKey[0]), 24)
+	String2char(szCode,uintptr(unsafe.Pointer(&req.chCode)),unsafe.Sizeof(req.chCode[0]))
+	String2char(szMarketKey,uintptr(unsafe.Pointer(&req.chMarketKey)),unsafe.Sizeof(req.chMarketKey[0]))
 	req.nDate = C.int(nDate)
 	req.nBeginTime = 0
 	req.nEndTime = 0
@@ -270,13 +257,13 @@ func getOrder(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int)  {
 		i += 10000
 		tmpPtr += sizeOf*10000
 	}
-	C.TDB_Free(pOrder)
-}
+
+}*/
 
 func GetOrderQueue(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int)  {
 	var req C.TDBDefine_ReqOrderQueue
-	copystr(szCode, uintptr(unsafe.Pointer(&req.chCode)), unsafe.Sizeof(req.chCode[0]), 32)
-	copystr(szMarketKey, uintptr(unsafe.Pointer(&req.chMarketKey)), unsafe.Sizeof(req.chMarketKey[0]), 24)
+	String2char(szCode,uintptr(unsafe.Pointer(&req.chCode)),unsafe.Sizeof(req.chCode[0]))
+	String2char(szMarketKey,uintptr(unsafe.Pointer(&req.chMarketKey)),unsafe.Sizeof(req.chMarketKey[0]))
 	req.nDate = C.int(nDate)
 	req.nBeginTime = 0
 	req.nEndTime = 0
@@ -289,6 +276,7 @@ func GetOrderQueue(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int)
 	fmt.Printf("收到 %d 条委托队列消息，打印 1/1000 条\n", pCount);
 	tmpPtr := uintptr(unsafe.Pointer(pOrderQueue))
 	sizeOf := unsafe.Sizeof(*pOrderQueue)
+
 	for i:=0; i<int(pCount); {
 		pOQ := (*C.TDBDefine_OrderQueue)(unsafe.Pointer(tmpPtr))
 		fmt.Printf("订单时间(Date): %d \n", pOQ.nDate)
@@ -302,8 +290,7 @@ func GetOrderQueue(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int)
 		i += 10000
 		tmpPtr += sizeOf*10000
 	}
-	C.TDB_Free(pOrderQueue)
 }
-*/
+
 
 
