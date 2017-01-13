@@ -23,20 +23,22 @@ func string2char(str string, des uintptr, sizeOf uintptr){
 	}
 }
 
-func char2byte(src uintptr, sizeOf uintptr) [128]byte {
-	var des [128]byte
-	for i:=0; i<32;i++ {
-		unit := (*byte)(unsafe.Pointer(src))
-		des[i] = *unit
-		src += sizeOf
+
+func char2byte(des uintptr, sizeOf uintptr, leng int)[128]byte{
+	var bytes [128]byte
+	for i:=0; i < leng; i++ {
+		unit := (*C.char)(unsafe.Pointer(des))
+		bytes[i] = byte(*unit)
+		des += sizeOf
 	}
-	return des
+	return bytes
 }
 
 func main(){
 	var hTdb C.THANDLE = nil
 
 	var settings C.OPEN_SETTINGS
+
 	//================================================
 	string2char("114.80.154.34",uintptr(unsafe.Pointer(&settings.szIP)),unsafe.Sizeof(settings.szIP[0]))
 	string2char("6261",uintptr(unsafe.Pointer(&settings.szPort)),unsafe.Sizeof(settings.szPort[0]))
@@ -49,6 +51,7 @@ func main(){
 
 	//proxy
 /*	var proxy_setting C.TDB_PROXY_SETTING
+
 	proxy_setting.nProxyType = C.TDB_PROXY_HTTP11
 	//================================================
 	string2char("10.100.3.42",uintptr(unsafe.Pointer(&proxy_setting.szProxyHostIp)),unsafe.Sizeof(proxy_setting.szProxyHostIp[0]))
@@ -57,6 +60,7 @@ func main(){
 	string2char("1",uintptr(unsafe.Pointer(&proxy_setting.szProxyPwd)),unsafe.Sizeof(proxy_setting.szProxyPwd[0]))
 	//================================================
 	*/
+
 	var LoginRes C.TDBDefine_ResLogin
 	//TDB_OpenProxy
 	//hTdb = C.TDB_OpenProxy(&settings, &proxy_setting, &LoginRes)
@@ -70,12 +74,8 @@ func main(){
 	//TDB_GetCOdeInfo
 	var pCode *C.TDBDefine_Code
 	pCode = C.TDB_GetCodeInfo(hTdb, C.CString("000001.SZ"), C.CString("SZ-2-0"))
-	/*var code_byte = [32]byte{}
-	for i:=0; i<len(pCode.chCode); i++ {
-		code_byte[i] = byte(pCode.chCode[i])
-	}*/
 
-	fmt.Printf("交易所代码 chWindCode:%s \n", char2byte(uintptr(unsafe.Pointer(&pCode.chCode)),unsafe.Sizeof(pCode.chCode[0])))
+	fmt.Printf("交易所代码 chWindCode:%s \n", char2byte(uintptr(unsafe.Pointer(&pCode.chCode)),unsafe.Sizeof(pCode.chCode[1]),len(pCode.chCode)))
 
 	var pCount C.int = 0
 	C.TDB_GetCodeTable(hTdb,C.CString("SZ"),&pCode,&pCount);
