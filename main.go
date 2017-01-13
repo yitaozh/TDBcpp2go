@@ -14,6 +14,8 @@ import (
 	"unsafe"
 )
 
+
+
 func main(){
 	var hTdb C.THANDLE = nil
 
@@ -21,10 +23,11 @@ func main(){
 	var settings C.OPEN_SETTINGS
 
 	//================================================
-	settings_bytes1 := []byte("114.80.154.34")
+	/*settings_bytes1 := []byte("114.80.154.34")
 	for i:=0; i<len(settings_bytes1); i++{
 		settings.szIP[i]=C.char(settings_bytes1[i])
-	}
+	}*/
+	
 	//================================================
 	settings_bytes2 := []byte("6261")
 	for i:=0 ;i<len(settings_bytes2) ;i++{

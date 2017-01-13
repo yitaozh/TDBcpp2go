@@ -63,3 +63,15 @@ func GetKData(hTdb C.THANDLE, szCode string, szMarket string, nBeginDate int, nE
 
 }
 
+func UseEZFFormula(hTdb C.THANDLE)  {
+	strName := "KDJ"
+	strContent := "INPUT:N(9), M1(3,1,100,2), M2(3);"
+	"RSV:=(CLOSE-LLV(LOW,N))/(HHV(HIGH,N)-LLV(LOW,N))*100;"
+	"K:SMA(RSV,M1,1);"
+	"D:SMA(K,M2,1);"
+	"J:3*K-2*D;"
+
+	var addRes *C.TDBDefine_AddFormulaRes = new(C.TDBDefine_AddFormulaRes)
+	var nErr int = C.TDB_AddFormula(hTdb, strName.c_str(), strContent.c_str(),addRes)
+}
+

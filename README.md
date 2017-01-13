@@ -5,6 +5,14 @@
 tmpPtr := uintptr(unsafe.Pointer(pCode))//已有pCode*数组
 sizeOf := unsafe.Sizeof(*pCode)
 pC := (*C.TDBDefine_Code)(unsafe.Pointer(tmpPtr))
+
+fmt.Println("-------------code table ----------------------------");
+fmt.Printf("chWindCode:%s \n", pC.chCode);
+fmt.Printf("chWindCode:%s \n", pC.chMarket);
+fmt.Printf("chWindCode:%s \n", pC.chCNName);
+fmt.Printf("chWindCode:%s \n", pC.chENName);
+fmt.Printf("chWindCode:%s \n", pC.nType);
+
 tmpPtr += sizeOf
 ```
 解答来源于http://studygolang.com/topics/594
