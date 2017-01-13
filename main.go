@@ -14,7 +14,7 @@ import (
 	"unsafe"
 )
 
-func string2char(str string, des uintptr, sizeOf uintptr){
+func String2char(str string, des uintptr, sizeOf uintptr){
 	bytes := []byte(str)
 	for i:=0; i<len(bytes); i++{
 		unit := (*C.char)(unsafe.Pointer(des))
@@ -23,8 +23,7 @@ func string2char(str string, des uintptr, sizeOf uintptr){
 	}
 }
 
-
-func char2byte(des uintptr, sizeOf uintptr, leng int)[128]byte{
+func Char2byte(des uintptr, sizeOf uintptr, leng int)[128]byte{
 	var bytes [128]byte
 	for i:=0; i < leng; i++ {
 		unit := (*C.char)(unsafe.Pointer(des))
@@ -34,16 +33,17 @@ func char2byte(des uintptr, sizeOf uintptr, leng int)[128]byte{
 	return bytes
 }
 
+
 func main(){
 	var hTdb C.THANDLE = nil
 
 	var settings C.OPEN_SETTINGS
 
 	//================================================
-	string2char("114.80.154.34",uintptr(unsafe.Pointer(&settings.szIP)),unsafe.Sizeof(settings.szIP[0]))
-	string2char("6261",uintptr(unsafe.Pointer(&settings.szPort)),unsafe.Sizeof(settings.szPort[0]))
-	string2char("TD3446699001",uintptr(unsafe.Pointer(&settings.szUser)),unsafe.Sizeof(settings.szUser[0]))
-	string2char("43449360",uintptr(unsafe.Pointer(&settings.szPassword)),unsafe.Sizeof(settings.szPassword[0]))
+	String2char("114.80.154.34",uintptr(unsafe.Pointer(&settings.szIP)),unsafe.Sizeof(settings.szIP[0]))
+	String2char("6261",uintptr(unsafe.Pointer(&settings.szPort)),unsafe.Sizeof(settings.szPort[0]))
+	String2char("TD3446699001",uintptr(unsafe.Pointer(&settings.szUser)),unsafe.Sizeof(settings.szUser[0]))
+	String2char("43449360",uintptr(unsafe.Pointer(&settings.szPassword)),unsafe.Sizeof(settings.szPassword[0]))
 	//================================================
 	settings.nRetryCount = 15
 	settings.nRetryGap = 1
@@ -75,22 +75,24 @@ func main(){
 	var pCode *C.TDBDefine_Code
 	pCode = C.TDB_GetCodeInfo(hTdb, C.CString("000001.SZ"), C.CString("SZ-2-0"))
 
-	fmt.Printf("交易所代码 chWindCode:%s \n", char2byte(uintptr(unsafe.Pointer(&pCode.chCode)),unsafe.Sizeof(pCode.chCode[1]),len(pCode.chCode)))
+	fmt.Printf("交易所代码 chWindCode:%s \n", Char2byte(uintptr(unsafe.Pointer(&pCode.chCode)),unsafe.Sizeof(pCode.chCode[1]),len(pCode.chCode)))
 
 	var pCount C.int = 0
 	C.TDB_GetCodeTable(hTdb,C.CString("SZ"),&pCode,&pCount);
-	tmpPtr := uintptr(unsafe.Pointer(pCode))
+	/*tmpPtr := uintptr(unsafe.Pointer(pCode))
 	sizeOf := unsafe.Sizeof(*pCode)
 	if pCount!=0 && pCode!=nil{
 		for i := 0; i < 2; i++{
 		pC := (*C.TDBDefine_Code)(unsafe.Pointer(tmpPtr))
 		fmt.Println("-------------code table ----------------------------");
-		fmt.Printf("chWindCode:%s \n", pC.chCode);
-		fmt.Printf("chWindCode:%s \n", pC.chMarket);
-		fmt.Printf("chWindCode:%s \n", pC.chCNName);
-		fmt.Printf("chWindCode:%s \n", pC.chENName);
-		fmt.Printf("chWindCode:%s \n", pC.nType);
+		fmt.Printf("交易所代码 chWindCode:%s \n", Char2byte(uintptr(unsafe.Pointer(&pC.chCode)),unsafe.Sizeof(pC.chCode),len(pC.chCode)))
+		fmt.Printf("市场代码 chWindCode:%s \n", Char2byte(uintptr(unsafe.Pointer(&pC.chMarket)),unsafe.Sizeof(pC.chMarket),len(pC.chMarket)))
+		fmt.Printf("证券中文名称 chWindCode:%s \n", Char2byte(uintptr(unsafe.Pointer(&pC.chCNName)),unsafe.Sizeof(pC.chCNName),len(pC.chCNName)))
+		fmt.Printf("证券英文名称 chWindCode:%s \n", Char2byte(uintptr(unsafe.Pointer(&pC.chENName)),unsafe.Sizeof(pC.chENName),len(pC.chENName)))
+		fmt.Printf("证券类型 chWindCode:%d \n", pC.nType)
 		tmpPtr += sizeOf
 		}
-	}
+	}*/
+
+	//UseEZFFormula(hTdb);
 }
