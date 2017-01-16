@@ -151,10 +151,10 @@ typedef struct {
     char chCode[32];                //交易所代码(ag1312)
     int nDate;                      //日期（自然日）格式：YYMMDD，例如20130101表示2013年1月1日，0表示今天
     int nTime;                      //时间（HHMMSSmmm）例如94500000 表示 9点45分00秒000毫秒
-    int    nOpen;                   //开盘((a double number + 0.00005) *10000)
-    int    nHigh;                   //最高((a double number + 0.00005) *10000)
-    int    nLow;                    //最低((a double number + 0.00005) *10000)
-    int    nClose;                  //收盘((a double number + 0.00005) *10000)
+    int nOpen;                   //开盘((a double number + 0.00005) *10000)
+    int nHigh;                   //最高((a double number + 0.00005) *10000)
+    int nLow;                    //最低((a double number + 0.00005) *10000)
+    int nClose;                  //收盘((a double number + 0.00005) *10000)
     __int64 iVolume;                //成交量
     __int64    iTurover;            //成交额(元)
     int    nMatchItems;             //成交笔数
@@ -197,12 +197,13 @@ typedef struct {
 	int nPreSettle;                    //昨结算((a double number + 0.00005) *10000)
 	int nPrePosition;                  //昨持仓
 
+
 	//下面的字段指数使用
-    int        nIndex;                  //不加权指数
-    int        nStocks;                 //品种总数
-    int        nUps;                    //上涨品种数
-    int        nDowns;                  //下跌品种数
-    int        nHoldLines;              //持平品种数
+    int nIndex;                  //不加权指数
+    int nStocks;                 //品种总数
+    int nUps;                    //上涨品种数
+    int nDowns;                  //下跌品种数
+    int nHoldLines;              //持平品种数
 
 	//保留字段
 	int nResv1;//保留字段1
@@ -247,7 +248,14 @@ typedef struct {
 }TDBDefine_Transaction;
 
 //逐笔委托数据 Order (SZ Level2 Only)
-typedef struct TDBDefine_ReqTransaction TDBDefine_ReqOrder ;
+typedef struct {
+    char chCode[32];            //证券万得代码(AG1312.SHF)
+	char chMarketKey[24];		//市场设置,如：SH-1-0;SZ-2-0
+    int  nDate;            //开始日期（交易日），格式YYMMDD
+    //int  nEndDate;              //数据日期（交易日）小于等于0和nBeginDate相同
+    int  nBeginTime;            //开始时间:<=0表示从0开始，格式：HHMMSSmmm
+    int  nEndTime;              //结束时间：<=0表示到最后
+}TDBDefine_ReqOrder ;
 
 typedef struct {
     char chWindCode[32];        //万得代码(AG1312.SHF)
@@ -263,7 +271,14 @@ typedef struct {
 }TDBDefine_Order;
 
 //委托队列数据 OrderQueue
-typedef struct TDBDefine_ReqTransaction TDBDefine_ReqOrderQueue;
+typedef struct {
+    char chCode[32];            //证券万得代码(AG1312.SHF)
+	char chMarketKey[24];		//市场设置,如：SH-1-0;SZ-2-0
+    int  nDate;            //开始日期（交易日），格式YYMMDD
+    //int  nEndDate;              //数据日期（交易日）小于等于0和nBeginDate相同
+    int  nBeginTime;            //开始时间:<=0表示从0开始，格式：HHMMSSmmm
+    int  nEndTime;              //结束时间：<=0表示到最后
+}TDBDefine_ReqOrderQueue;
 
 typedef struct {
     char    chWindCode[32];         //万得代码(AG1312.SHF)
@@ -330,4 +345,3 @@ typedef struct {
 #endif
 
 #endif//_TDBAPISTRUCT_H_
-
