@@ -96,7 +96,7 @@ func main(){
 	//GetKData(hTdb, "600715.SH", "SH-2-0", 20151126, 20151126, C.CYC_MINUTE, 0, 0, 1);//autocomplete k-minute
 	//GetTickData(hTdb, "000001.sz", "SZ-2-0", 20150910);//tick
 	//GetTransaction(hTdb, "000001.sz", "SZ-2-0", 20150910);//Transaction
-	GetOrder(hTdb, "000001.sz", "SZ-2-0", 20150910);//Order
+	//GetOrder(hTdb, "000001.sz", "SZ-2-0", 20150910);//Order
 	//GetOrderQueue(hTdb, "000001.sz", "SZ-2-0", 20150910);//OrderQueue
 	//UseEZFFormula(hTdb);//test for formula
 

@@ -164,21 +164,31 @@ typedef struct {
 typedef struct {
     char chWindCode[32];                //万得代码(AG1312.SHF)
     char chCode[32];                    //交易所代码(ag1312)
-    int nDate;                          //日期（自然日）
-    int nTime;                          //时间（HHMMSSmmm）例如94500000 表示 9点45分00秒000毫秒
-    int nPrice;                         //成交价((a double number + 0.00005) *10000)
     __int64 iVolume;                    //成交量
     __int64    iTurover;                //成交额(元)
-    int nMatchItems;                    //成交笔数
-    int nInterest;                      //IOPV(基金)、利息(债券)
-    char chTradeFlag;                   //成交标志
-    char chBSFlag;                      //BS标志
     __int64 iAccVolume;                 //当日累计成交量
     __int64 iAccTurover;             //当日成交额(元)
+    __int64 iTotalAskVolume;           //叫卖总量(上海L2)
+    __int64 iTotalBidVolume;           //叫买总量(上海L2)
     int nHigh;                          //最高((a double number + 0.00005) *10000)
     int nLow;                           //最低((a double number + 0.00005) *10000)
     int nOpen;                       //开盘((a double number + 0.00005) *10000)
     int nPreClose;                   //前收盘((a double number + 0.00005) *10000)
+    //买卖盘字段
+    int nAskPrice[10];               //叫卖价((a double number + 0.00005) *10000)
+    unsigned nAskVolume[10];            //叫卖量
+    int nBidPrice[10];               //叫买价((a double number + 0.00005) *10000)
+    unsigned nBidVolume[10];            //叫买量
+    int nAskAvPrice;                 //加权平均叫卖价(上海L2)((a double number + 0.00005) *10000)
+    int nBidAvPrice;                 //加权平均叫买价(上海L2)((a double number + 0.00005) *10000)
+    int nDate;                          //日期（自然日）
+    int nTime;                          //时间（HHMMSSmmm）例如94500000 表示 9点45分00秒000毫秒
+    int nPrice;                         //成交价((a double number + 0.00005) *10000)
+
+    int nMatchItems;                    //成交笔数
+    int nInterest;                      //IOPV(基金)、利息(债券)
+    char chTradeFlag;                   //成交标志
+    char chBSFlag;                      //BS标志
 
 	//期货字段
 	int nSettle;                        //结算价((a double number + 0.00005) *10000)
@@ -187,15 +197,6 @@ typedef struct {
 	int nPreSettle;                    //昨结算((a double number + 0.00005) *10000)
 	int nPrePosition;                  //昨持仓
 
-	//买卖盘字段
-	int nAskPrice[10];               //叫卖价((a double number + 0.00005) *10000)
-	unsigned nAskVolume[10];            //叫卖量
-	int nBidPrice[10];               //叫买价((a double number + 0.00005) *10000)
-	unsigned nBidVolume[10];            //叫买量
-	int nAskAvPrice;                 //加权平均叫卖价(上海L2)((a double number + 0.00005) *10000)
-	int nBidAvPrice;                 //加权平均叫买价(上海L2)((a double number + 0.00005) *10000)
-	__int64 iTotalAskVolume;           //叫卖总量(上海L2)
-	__int64 iTotalBidVolume;           //叫买总量(上海L2)
 
 	//下面的字段指数使用
     int nIndex;                  //不加权指数
@@ -234,16 +235,16 @@ typedef struct {
 typedef struct {
     char    chWindCode[32];     //万得代码(AG1312.SHF)
     char    chCode[32];         //交易所代码(ag1312)
+    int     nTradePrice;        //成交价格((a double number + 0.00005) *10000)
+    int     nTradeVolume;       //成交数量
+    int     nAskOrder;          //叫卖序号
+    int     nBidOrder;          //叫买序号
     int     nDate;              //日期（自然日）格式:YYMMDD
     int     nTime;              //成交时间(精确到毫秒HHMMSSmmm)
     int     nIndex;             //成交编号(从1开始，递增1)
     char    chFunctionCode;     //成交代码: 'C', 0
     char    chOrderKind;        //委托类别
     char    chBSFlag;           //BS标志
-    int     nTradePrice;        //成交价格((a double number + 0.00005) *10000)
-    int     nTradeVolume;       //成交数量
-    int     nAskOrder;          //叫卖序号
-    int     nBidOrder;          //叫买序号
 }TDBDefine_Transaction;
 
 //逐笔委托数据 Order (SZ Level2 Only)
@@ -259,14 +260,14 @@ typedef struct {
 typedef struct {
     char chWindCode[32];        //万得代码(AG1312.SHF)
     char chCode[32];            //交易所代码(ag1312)
+    int  nOrderPrice;           //委托价格((a double number + 0.00005) *10000)
     int  nDate;                 //日期（自然日）格式YYMMDD
     int  nTime;                 //委托时间（精确到毫秒HHMMSSmmm）
     int  nIndex;                //委托编号，从1开始，递增1
     int  nOrder;                //交易所委托号
+    int  nOrderVolume;          //委托数量
     char chOrderKind;           //委托类别
     char chFunctionCode;        //委托代码, B, S, C
-    int  nOrderPrice;           //委托价格((a double number + 0.00005) *10000)
-    int  nOrderVolume;          //委托数量
 }TDBDefine_Order;
 
 //委托队列数据 OrderQueue
