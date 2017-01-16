@@ -35,6 +35,7 @@ func Char2byte(des uintptr, sizeOf uintptr, leng int)[256]byte{
 	}
 	return bytes
 }
+
 /*
 func cpy(str string, des uintptr, sizeOf uintptr, len int) {
 	bytes := []byte(str)
@@ -180,6 +181,7 @@ func UseEZFFormula(hTdb C.THANDLE){
 	tmpPtr_pEZFItem := uintptr(unsafe.Pointer(pEZFItem))
 	sizeOf_pEZFItem := unsafe.Sizeof(*pEZFItem)
 	//fmt.Println(nItems)
+
 	var i C.int = 0
 	var j C.int = 0
 	for i=0; i<nItems; i++{
@@ -208,6 +210,7 @@ func UseEZFFormula(hTdb C.THANDLE){
 	tmpPtr_reqCalc := uintptr(unsafe.Pointer(&reqCalc.chFormulaName))
 	sizeOf_reqCalc := unsafe.Sizeof(reqCalc.chFormulaName)
 
+
 	String2char("KDJ", tmpPtr_reqCalc, sizeOf_reqCalc)
 	//strncpy(reqCalc.chFormulaName, "KDJ", sizeof(reqCalc.chFormulaName));
 	tmpPtr_chParam := uintptr(unsafe.Pointer(&reqCalc.chParam))
@@ -221,6 +224,7 @@ func UseEZFFormula(hTdb C.THANDLE){
 	tmpPtr_chMarketKey := uintptr(unsafe.Pointer(&reqCalc.chMarketKey))
 	sizeOf_chMarketKey := unsafe.Sizeof(reqCalc.chMarketKey)
 	String2char("SZ-2-0", tmpPtr_chMarketKey, sizeOf_chMarketKey)
+
 	//strncpy(reqCalc.chMarketKey, "SZ-2-0", sizeof(reqCalc.chMarketKey))
 
 	reqCalc.nCycType = uint32(EZFCyc[0].nCyc)		//0表示日线
@@ -231,6 +235,7 @@ func UseEZFFormula(hTdb C.THANDLE){
 
 	var pResult *C.TDBDefine_CalcFormulaRes = new(C.TDBDefine_CalcFormulaRes)
 	nErr = C.TDB_CalcFormula(hTdb, &reqCalc, pResult)
+
 	//判断错误代码
 
 	fmt.Printf("计算结果有: %d 条:\n", pResult.nRecordCount)
@@ -254,9 +259,11 @@ func UseEZFFormula(hTdb C.THANDLE){
 
 	//删除之前上传的公式指标
 	var pDel C.TDBDefine_DelFormulaRes
+
 	nErr = C.TDB_DeleteFormula(hTdb, C.CString("KDJ"), &pDel)
 	fmt.Printf("删除指标信息:%s\n", Char2byte(uintptr(unsafe.Pointer(&pDel.chInfo)),unsafe.Sizeof(pDel.chInfo[1]),len(pDel.chInfo)))
 	fmt.Printf("Error:%d\n", int(nErr))
+
 	//释放内存
 	//C.delete(pEZFItem)
 	C.TDB_ReleaseCalcFormula(pResult)
