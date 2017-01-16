@@ -14,25 +14,6 @@ import (
 	"unsafe"
 )
 
-func String2char(str string, des uintptr, sizeOf uintptr){
-	bytes := []byte(str)
-	for i:=0; i<len(bytes); i++{
-		unit := (*C.char)(unsafe.Pointer(des))
-		*unit = C.char(bytes[i])
-		des += sizeOf
-	}
-}
-
-
-func Char2byte(des uintptr, sizeOf uintptr, leng int)[256]byte{
-	var bytes [256]byte
-	for i:=0; i < leng; i++ {
-		unit := (*C.char)(unsafe.Pointer(des))
-		bytes[i] = byte(*unit)
-		des += sizeOf
-	}
-	return bytes
-}
 
 func main(){
 	var hTdb C.THANDLE = nil
@@ -78,6 +59,9 @@ func main(){
 
 
 
+
+	fmt.Printf("交易所代码 chWindCode:%s \n", Char2byte(uintptr(unsafe.Pointer(&pCode.chCode)),unsafe.Sizeof(pCode.chCode[1]),len(pCode.chCode)))
+
 	var pCount C.int = 0
 	C.TDB_GetCodeTable(hTdb,C.CString("SZ"),&pCode,&pCount);
 	tmpPtr := uintptr(unsafe.Pointer(pCode))
@@ -86,13 +70,14 @@ func main(){
 		for i := 0; i < 2; i++{
 		pC := (*C.TDBDefine_Code)(unsafe.Pointer(tmpPtr))
 		fmt.Println("-------------code table ----------------------------");
-		fmt.Printf("chWindCode:%s \n", pC.chCode);
-		fmt.Printf("chWindCode:%s \n", pC.chMarket);
-		fmt.Printf("chWindCode:%s \n", pC.chCNName);
-		fmt.Printf("chWindCode:%s \n", pC.chENName);
-		fmt.Printf("chWindCode:%s \n", pC.nType);
+		fmt.Printf("交易所代码 chWindCode:%s \n", Char2byte(uintptr(unsafe.Pointer(&pC.chCode)),unsafe.Sizeof(pC.chCode),len(pC.chCode)))
+		fmt.Printf("市场代码 chWindCode:%s \n", Char2byte(uintptr(unsafe.Pointer(&pC.chMarket)),unsafe.Sizeof(pC.chMarket),len(pC.chMarket)))
+		fmt.Printf("证券中文名称 chWindCode:%s \n", Char2byte(uintptr(unsafe.Pointer(&pC.chCNName)),unsafe.Sizeof(pC.chCNName),len(pC.chCNName)))
+		fmt.Printf("证券英文名称 chWindCode:%s \n", Char2byte(uintptr(unsafe.Pointer(&pC.chENName)),unsafe.Sizeof(pC.chENName),len(pC.chENName)))
+		fmt.Printf("证券类型 chWindCode:%d \n", pC.nType)
 		tmpPtr += sizeOf
 		}
+
 	}
 	GetKData(hTdb, "600715.SH", "SH-2-0", 20151126, 20151126, C.CYC_MINUTE, 0, 0, 1);//autocomplete k-minute
 	GetTickData(hTdb, "000001.sz", "SZ-2-0", 20150910);//tick
@@ -101,4 +86,6 @@ func main(){
 	GetOrderQueue(hTdb, "000001.sz", "SZ-2-0", 20150910);//OrderQueue
 	UseEZFFormula(hTdb);//test for formula
 
+
+	UseEZFFormula(hTdb);
 }

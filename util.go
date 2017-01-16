@@ -1,11 +1,12 @@
 package main
 
 /*
-#cgo LDFLAGS: -lTDBAPI
+#cgo LDFLAGS: -lTDBAPI -lstdc++
 #include "include/TDBAPI.h"
 #include "include/TDBAPIStruct.h"
 #include <stdlib.h>
- */
+#include <string.h>
+*/
 import "C"
 import (
 	"fmt"
@@ -16,9 +17,30 @@ import (
 )
 
 
+func String2char(str string, des uintptr, sizeOf uintptr){
+	bytes := []byte(str)
+	for i:=0; i<len(bytes); i++{
+		unit := (*C.char)(unsafe.Pointer(des))
+		*unit = C.char(bytes[i])
+		des += sizeOf
+	}
+}
+
+func Char2byte(des uintptr, sizeOf uintptr, leng int)[256]byte{
+	var bytes [256]byte
+	for i:=0; i < leng; i++ {
+		unit := (*C.char)(unsafe.Pointer(des))
+		bytes[i] = byte(*unit)
+		des += sizeOf
+	}
+	return bytes
+}
+
+
 func GetTickCount() int64 {
 	return time.Now().Unix()
 }
+
 
 func array2str(arr [10]C.int, len int) string {
 	var str string
@@ -56,7 +78,6 @@ func array2str4C(arr [50]C.int, len C.int) string {
 	return str
 }
 
-
 //请求代码表
 func GetCodeTable(hTdb C.THANDLE, szMarket string)  {
 	var (
@@ -90,6 +111,7 @@ func GetCodeTable(hTdb C.THANDLE, szMarket string)  {
 	}
 
 }
+
 //tested good
 func GetKData(hTdb C.THANDLE, szCode string, szMarket string, nBeginDate int, nEndDate int, nCycle int, nUserDef int, nCQFlag int, nAutoComplete int) {
 	var req *C.TDBDefine_ReqKLine = new(C.TDBDefine_ReqKLine)
@@ -124,6 +146,7 @@ func GetKData(hTdb C.THANDLE, szCode string, szMarket string, nBeginDate int, nE
 		i += 100
 	}
 }
+
 
 //tested good
 func GetTickData(hTdb C.THANDLE, szCode string, szMarket string, nDate int)  {
@@ -271,24 +294,24 @@ func GetOrder(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int)  {
 
 }
 //tested
-func GetOrderQueue(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int)  {
+func GetOrderQueue(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int) {
 	var req C.TDBDefine_ReqOrderQueue
-	String2char(szCode,uintptr(unsafe.Pointer(&req.chCode)),unsafe.Sizeof(req.chCode[0]))
-	String2char(szMarketKey,uintptr(unsafe.Pointer(&req.chMarketKey)),unsafe.Sizeof(req.chMarketKey[0]))
+	String2char(szCode, uintptr(unsafe.Pointer(&req.chCode)), unsafe.Sizeof(req.chCode[0]))
+	String2char(szMarketKey, uintptr(unsafe.Pointer(&req.chMarketKey)), unsafe.Sizeof(req.chMarketKey[0]))
 	req.nDate = C.int(nDate)
 	req.nBeginTime = 0
 	req.nEndTime = 0
 
 	var pOrderQueue *C.TDBDefine_OrderQueue = nil
 	var pCount C.int
-	C.TDB_GetOrderQueue(hTdb,&req, &pOrderQueue, &pCount)
+	C.TDB_GetOrderQueue(hTdb, &req, &pOrderQueue, &pCount)
 
 	fmt.Println("-------------------OrderQueue Data-------------");
 	fmt.Printf("收到 %d 条委托队列消息，打印 1/1000 条\n", pCount);
 	tmpPtr := uintptr(unsafe.Pointer(pOrderQueue))
 	sizeOf := unsafe.Sizeof(*pOrderQueue)
 
-	for i:=0; i<int(pCount); {
+	for i := 0; i < int(pCount); {
 		pOQ := (*C.TDBDefine_OrderQueue)(unsafe.Pointer(tmpPtr))
 		fmt.Printf("订单时间(Date): %d \n", pOQ.nDate)
 		fmt.Printf("订单时间(HHMMSS): %d \n", pOQ.nTime)
@@ -299,7 +322,8 @@ func GetOrderQueue(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int)
 		fmt.Printf("订单明细: %s \n", array2str4C(pOQ.nABVolume, pOQ.nABItems))
 		fmt.Println("---------------------------------------------")
 		i += 10000
-		tmpPtr += sizeOf*10000
+		tmpPtr += sizeOf * 10000
+
 	}
 }
 
@@ -309,7 +333,7 @@ func UseEZFFormula(hTdb C.THANDLE) {
 	strName := "KDJ"
 	strContent := "INPUT:N(9), M1(3,1,100,2), M2(3);RSV:=(CLOSE-LLV(LOW,N))/(HHV(HIGH,N)-LLV(LOW,N))*100;K:SMA(RSV,M1,1);D:SMA(K,M2,1);J:3*K-2*D;"
 
-	//添加公式到服务器并编译，若不过，会有错误返回
+	//添加公式到服务器并编译，若<<<<<<< HEAD不过，会有错误返回
 	var addRes *C.TDBDefine_AddFormulaRes = new(C.TDBDefine_AddFormulaRes)
 	nErr := C.TDB_AddFormula(hTdb, C.CString(strName), C.CString(strContent),addRes)
 	fmt.Printf("Add Formula Result:%s\n",Char2byte(uintptr(unsafe.Pointer(&addRes.chInfo)),unsafe.Sizeof(addRes.chInfo[0]),len(addRes.chInfo)))
@@ -398,6 +422,3 @@ func UseEZFFormula(hTdb C.THANDLE) {
 
 	C.TDB_ReleaseCalcFormula(pResult)
 }
-
-
-
