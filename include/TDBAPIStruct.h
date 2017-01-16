@@ -35,7 +35,7 @@ extern "C" {
 typedef void* THANDLE;
 #endif
 
-enum TDB_ERROR
+typedef enum
 {
     TDB_SUCCESS = 0,
 
@@ -49,7 +49,7 @@ enum TDB_ERROR
 
 
     TDB_WRONG_FORMULA=-50,      //指标公式错误
-};
+}TDB_ERROR;
 
 
 typedef enum
@@ -80,14 +80,14 @@ typedef struct {
 }OPEN_SETTINGS;
 
 //复权方式
-enum REFILLFLAG
+typedef enum
 {
     REFILL_NONE = 0,        //不复权
     REFILL_BACKWARD=1,      //全程向前复权（从现在向过去）
     REFILL_FORWARD=2,       //全程向后复权（从过去向现在）
-} ;
+}REFILLFLAG;
 
-enum CYCTYPE
+typedef enum
 {
     CYC_SECOND,
     CYC_MINUTE,
@@ -98,14 +98,14 @@ enum CYCTYPE
     CYC_HAFLYEAR,
     CYC_YEAR,
     CYC_TICKBAR,
-};
+}CYCTYPE;
 
 //买卖方向
-enum ORDERSIDE
+typedef enum
 {
     ORDERSIDE_BID = 0,      //买
     ORDERSIDE_ASK,          //卖
-} ;
+} ORDERSIDE;
 
 //TODO
 
@@ -134,10 +134,10 @@ typedef struct {
 typedef struct {
     char chCode[32];            //证券万得代码(AG1312.SHF)
 	char chMarketKey[24];		//市场设置,如：SH-1-0;SZ-2-0
-    enum REFILLFLAG nCQFlag;         //除权标志：不复权，向前复权，向后复权
+    REFILLFLAG nCQFlag;         //除权标志：不复权，向前复权，向后复权
     int nCQDate;                //复权日期(<=0:全程复权) 格式：YYMMDD，例如20130101表示2013年1月1日
     int nQJFlag;                //全价标志(债券)(0:净价 1:全价)
-    enum CYCTYPE nCycType;           //数据周期：秒线、分钟、日线、周线、月线、季线、半年线、年线、TickBar
+    CYCTYPE nCycType;           //数据周期：秒线、分钟、日线、周线、月线、季线、半年线、年线、TickBar
     int nCycDef;                //周期数量：仅当nCycType取值：秒、分钟、日线、周线、月线时，这个字段有效。
     int nAutoComplete;          //自动补齐：仅1秒钟线、1分钟线支持这个标志，（不为0：补齐；0：不补齐）
     int nBeginDate;             //开始日期(交易日，<0:从上市日期开始； 0:从今天开始)
@@ -326,10 +326,10 @@ typedef struct {
     char chCode[32];        //万得代码，形如：AG1312.SHF
 	char chMarketKey[24];		//市场设置,如：SH-1-0;SZ-2-0
 
-    enum CYCTYPE  nCycType;      //数据周期
+    CYCTYPE  nCycType;      //数据周期
     int  nCycDef;           //数据周期定义
 
-    enum REFILLFLAG  nCQFlag;    //除权标志
+    REFILLFLAG  nCQFlag;    //除权标志
     int nBondDataType;      //债券全价标志
 
     int  nCQDate;           //除权日期

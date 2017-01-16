@@ -75,7 +75,7 @@ func main(){
 	var pCode *C.TDBDefine_Code
 	pCode = C.TDB_GetCodeInfo(hTdb, C.CString("000001.SZ"), C.CString("SZ-2-0"))
 
-	fmt.Printf("交易所代码 chWindCode:%s \n", Char2byte(uintptr(unsafe.Pointer(&pCode.chCode)),unsafe.Sizeof(pCode.chCode[1]),len(pCode.chCode)))
+	fmt.Printf("交易所代码 chWindCode:%s \n", Char2byte(uintptr(unsafe.Pointer(&pCode.chCode)),unsafe.Sizeof(pCode.chCode[0]),len(pCode.chCode)))
 /*
 	var pCount C.int = 0
 	C.TDB_GetCodeTable(hTdb,C.CString("SZ"),&pCode,&pCount);
@@ -93,6 +93,11 @@ func main(){
 		tmpPtr += sizeOf
 		}
 	}*/
-	GetOrderQueue(hTdb, "000001.sz", "SZ-2-0", 20150910);//OrderQueue
+	//GetKData(hTdb, "600715.SH", "SH-2-0", 20151126, 20151126, C.CYC_MINUTE, 0, 0, 1);//autocomplete k-minute
+	//GetTickData(hTdb, "000001.sz", "SZ-2-0", 20150910);//tick
+	//GetTransaction(hTdb, "000001.sz", "SZ-2-0", 20150910);//Transaction
+	GetOrder(hTdb, "000001.sz", "SZ-2-0", 20150910);//Order
+	//GetOrderQueue(hTdb, "000001.sz", "SZ-2-0", 20150910);//OrderQueue
+	//UseEZFFormula(hTdb);//test for formula
 
 }
