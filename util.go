@@ -13,9 +13,23 @@ import (
 	"time"
 	"unsafe"
 	"strconv"
-
+	//"io"
+	"os"
 )
 
+func check(e error)  {
+	if e!=nil{
+		panic(e)
+	}
+}
+
+func checkFilesExist(filename string)(bool){
+	var exist = true
+	if _,err := os.Stat(filename); os.IsNotExist(err){
+		exist = false
+	}
+	return exist
+}
 
 func String2char(str string, des uintptr, sizeOf uintptr){
 	bytes := []byte(str)
@@ -36,11 +50,9 @@ func Char2byte(des uintptr, sizeOf uintptr, leng int)[256]byte{
 	return bytes
 }
 
-
 func GetTickCount() int64 {
 	return time.Now().Unix()
 }
-
 
 func array2str(arr [10]C.int, len int) string {
 	var str string
@@ -146,7 +158,6 @@ func GetKData(hTdb C.THANDLE, szCode string, szMarket string, nBeginDate int, nE
 		i += 100
 	}
 }
-
 
 //tested good
 func GetTickData(hTdb C.THANDLE, szCode string, szMarket string, nDate int)  {
@@ -293,6 +304,7 @@ func GetOrder(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int)  {
 	}
 
 }
+
 //tested
 func GetOrderQueue(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int) {
 	var req C.TDBDefine_ReqOrderQueue
@@ -328,22 +340,40 @@ func GetOrderQueue(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int)
 }
 
 //指标公式
+
 func UseEZFFormula(hTdb C.THANDLE) {
+	fmt.Println("-------------------UseEZFFormula-------------");
 	//公式的编写，请参考<<TRANSEND-TS-M0001 易编公式函数表V1(2).0-20110822.pdf>>
 	strName := "KDJ"
 	strContent := "INPUT:N(9), M1(3,1,100,2), M2(3);RSV:=(CLOSE-LLV(LOW,N))/(HHV(HIGH,N)-LLV(LOW,N))*100;K:SMA(RSV,M1,1);D:SMA(K,M2,1);J:3*K-2*D;"
 
-	//添加公式到服务器并编译，若<<<<<<< HEAD不过，会有错误返回
+	//添加公式到服务器并编译，若不过，会有错误返回
 	var addRes *C.TDBDefine_AddFormulaRes = new(C.TDBDefine_AddFormulaRes)
 	nErr := C.TDB_AddFormula(hTdb, C.CString(strName), C.CString(strContent),addRes)
 	fmt.Printf("Add Formula Result:%s\n",Char2byte(uintptr(unsafe.Pointer(&addRes.chInfo)),unsafe.Sizeof(addRes.chInfo[0]),len(addRes.chInfo)))
-
+//======================================================================================================
+/*	var filename string = "./output1.txt"
+	var f *os.File
+	var err1 error
+	if checkFilesExist(filename){
+		f, err1 = os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
+		fmt.Println("file exist")
+	}else{
+		f, err1 = os.Create(filename)
+		fmt.Println("file not exist")
+	}
+	check(err1)
+	bytes := Char2byte(uintptr(unsafe.Pointer(&addRes.chInfo)),unsafe.Sizeof(addRes.chInfo[0]),len(addRes.chInfo))
+	str:= string(bytes[:])
+	n, err1 := io.WriteString(f, str)
+	check(err1)
+	fmt.Printf("write %d bit\n", n)*/
+//======================================================================================================
 	//查询服务器上的公式，能看到我们刚才上传的"KDJ"
 	var pEZFItem *C.TDBDefine_FormulaItem = nil
 	var nItems C.int = 0
-	//名字为空表示查询服务器上所有的公式
+	//名字为空表示查�HB�j�RX 询服务器上所有的公式
 	nErr = C.TDB_GetFormula(hTdb, nil, &pEZFItem, &nItems)
-	fmt.Println(nErr)
 	tmpPtr := uintptr(unsafe.Pointer(pEZFItem))
 	sizeOf := unsafe.Sizeof(*pEZFItem)
 	for i:=0; i<int(nItems); i++{
@@ -369,24 +399,25 @@ func UseEZFFormula(hTdb C.THANDLE) {
 
 	//获取公式的计算结果
 	var reqCalc C.TDBDefine_ReqCalcFormula
-	fmt.Println(len(reqCalc.chFormulaName))
 	tmpPtr_reqCalc := uintptr(unsafe.Pointer(&reqCalc.chFormulaName))
-	sizeOf_reqCalc := unsafe.Sizeof(reqCalc.chFormulaName)
-
+	sizeOf_reqCalc := unsafe.Sizeof(reqCalc.chFormulaName[0])
 	String2char("KDJ", tmpPtr_reqCalc, sizeOf_reqCalc)
+
 	tmpPtr_chParam := uintptr(unsafe.Pointer(&reqCalc.chParam))
-	sizeOf_chParam := unsafe.Sizeof(reqCalc.chParam)
+	sizeOf_chParam := unsafe.Sizeof(reqCalc.chParam[0])
 	String2char("N=9,M1=3,M2=3", tmpPtr_chParam, sizeOf_chParam)
+
 	tmpPtr_chCode := uintptr(unsafe.Pointer(&reqCalc.chCode))
-	sizeOf_chCode := unsafe.Sizeof(reqCalc.chCode)
+	sizeOf_chCode := unsafe.Sizeof(reqCalc.chCode[0])
 	String2char("000001.SZ", tmpPtr_chCode, sizeOf_chCode)
+
 	tmpPtr_chMarketKey := uintptr(unsafe.Pointer(&reqCalc.chMarketKey))
-	sizeOf_chMarketKey := unsafe.Sizeof(reqCalc.chMarketKey)
+	sizeOf_chMarketKey := unsafe.Sizeof(reqCalc.chMarketKey[0])
 	String2char("SZ-2-0", tmpPtr_chMarketKey, sizeOf_chMarketKey)
 
 	reqCalc.nCycType = C.CYCTYPE(EZFCyc[0].nCyc)		//0表示日线
 	reqCalc.nCycDef = C.int(EZFCyc[0].nCyc1)
-	reqCalc.nCQFlag = 0				//除权标志
+	reqCalc.nCQFlag = C.REFILLFLAG(0)			//除权标志
 	reqCalc.nCalcMaxItems = 4000 			//计算的最大数据量
 	reqCalc.nResultMaxItems = 100			//传送的结果的最大数据量
 
@@ -394,21 +425,22 @@ func UseEZFFormula(hTdb C.THANDLE) {
 	nErr = C.TDB_CalcFormula(hTdb, &reqCalc, pResult)
 
 	//判断错误代码
-	fmt.Printf("计算结果有: %d 条:\n", pResult.nRecordCount)
+	fmt.Printf("计算结果有: %d 条\n", pResult.nRecordCount)
 
 	var i C.int = 0
 	var j C.int = 0
+	//nFieldCount = 4
 	for j=0; j<pResult.nFieldCount;j++{
 		tmpPtr_chFieldName := uintptr(unsafe.Pointer(&pResult.chFieldName[j]))
-		sizeOf_chFieldName := unsafe.Sizeof(pResult.chFieldName[j])
+		sizeOf_chFieldName := unsafe.Sizeof(pResult.chFieldName[j][1])
 		fmt.Printf("%s  ",Char2byte(tmpPtr_chFieldName,sizeOf_chFieldName,len(pResult.chFieldName[j])))
 	}
-	fmt.Println();
-	fmt.Println();
+	fmt.Println()
+
 	//输出数据
 	for i=0; i<pResult.nRecordCount; i+=100{
 		for j=0; j<pResult.nFieldCount;j++{
-			fmt.Printf("%c  ", pResult.dataFileds[i*pResult.nFieldCount+j])
+			fmt.Printf("%d  ", *pResult.dataFileds[j])
 		}
 		fmt.Println()
 	}

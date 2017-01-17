@@ -26,9 +26,9 @@ func main(){
 	String2char("TD3446699001",uintptr(unsafe.Pointer(&settings.szUser)),unsafe.Sizeof(settings.szUser[0]))
 	String2char("43449360",uintptr(unsafe.Pointer(&settings.szPassword)),unsafe.Sizeof(settings.szPassword[0]))
 	//================================================
-	settings.nRetryCount = 15
-	settings.nRetryGap = 1
-	settings.nTimeOutVal = 1
+	settings.nRetryCount = 100
+	settings.nRetryGap = 100
+	settings.nTimeOutVal = 100
 
 	//proxy
 /*	var proxy_setting C.TDB_PROXY_SETTING
@@ -57,11 +57,6 @@ func main(){
 	pCode = C.TDB_GetCodeInfo(hTdb, C.CString("000001.SZ"), C.CString("SZ-2-0"))
 	fmt.Printf("交易所代码 chWindCode:%s \n", Char2byte(uintptr(unsafe.Pointer(&pCode.chCode)),unsafe.Sizeof(pCode.chCode[0]),len(pCode.chCode)))
 
-
-
-
-	fmt.Printf("交易所代码 chWindCode:%s \n", Char2byte(uintptr(unsafe.Pointer(&pCode.chCode)),unsafe.Sizeof(pCode.chCode[1]),len(pCode.chCode)))
-
 	var pCount C.int = 0
 	C.TDB_GetCodeTable(hTdb,C.CString("SZ"),&pCode,&pCount);
 	tmpPtr := uintptr(unsafe.Pointer(pCode))
@@ -79,13 +74,10 @@ func main(){
 		}
 
 	}
-	GetKData(hTdb, "600715.SH", "SH-2-0", 20151126, 20151126, C.CYC_MINUTE, 0, 0, 1);//autocomplete k-minute
-	GetTickData(hTdb, "000001.sz", "SZ-2-0", 20150910);//tick
-	GetTransaction(hTdb, "000001.sz", "SZ-2-0", 20150910);//Transaction
-	GetOrder(hTdb, "000001.sz", "SZ-2-0", 20150910);//Order
-	GetOrderQueue(hTdb, "000001.sz", "SZ-2-0", 20150910);//OrderQueue
-	UseEZFFormula(hTdb);//test for formula
-
-
-	UseEZFFormula(hTdb);
+	//GetKData(hTdb, "600715.SH", "SH-2-0", 20151126, 20151126, C.CYC_MINUTE, 0, 0, 1);	//autocomplete k-minute
+	//GetTickData(hTdb, "000001.sz", "SZ-2-0", 20150910);					//tick
+	//GetTransaction(hTdb, "000001.sz", "SZ-2-0", 20150910);					//Transaction
+	//GetOrder(hTdb, "000001.sz", "SZ-2-0", 20150910);					//Order
+	//GetOrderQueue(hTdb, "000001.sz", "SZ-2-0", 20150910);					//OrderQueue
+	UseEZFFormula(hTdb);									//test for formula
 }
