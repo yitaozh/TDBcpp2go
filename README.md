@@ -24,3 +24,24 @@ settings_bytes1 := []byte("114.80.154.34")
 		settings.szIP[i]=C.char(settings_bytes1[i])
 	}
 ```
+
+### 在cgo中，如果c结构体整形、字符类型相间定义，由于字段对齐规则不同，无法对结构体所有字段直接赋值，可以通过切片的方式逐片拼装
+```go
+l := unsafe.Sizeof(*pTransaction)
+buf := (*[1024]byte)(unsafe.Pointer(pTransaction))
+
+var transaction Define_Transaction
+binary.Read(bytes.NewBuffer(buf[0:32]), binary.LittleEndian, &transaction.chWindCode)
+binary.Read(bytes.NewBuffer(buf[32:64]), binary.LittleEndian, &transaction.chCode)
+binary.Read(bytes.NewBuffer(buf[64:68]), binary.LittleEndian, &transaction.nDate)
+binary.Read(bytes.NewBuffer(buf[68:72]), binary.LittleEndian, &transaction.nTime)
+binary.Read(bytes.NewBuffer(buf[72:76]), binary.LittleEndian, &transaction.nIndex)
+binary.Read(bytes.NewBuffer(buf[76:77]), binary.LittleEndian, &transaction.chFunctionCode)
+binary.Read(bytes.NewBuffer(buf[77:78]), binary.LittleEndian, &transaction.chOrderKind)
+binary.Read(bytes.NewBuffer(buf[78:79]), binary.LittleEndian, &transaction.chBSFlag)
+binary.Read(bytes.NewBuffer(buf[79:83]), binary.LittleEndian, &transaction.nTradePrice)
+binary.Read(bytes.NewBuffer(buf[83:87]), binary.LittleEndian, &transaction.nTradeVolume)
+binary.Read(bytes.NewBuffer(buf[87:91]), binary.LittleEndian, &transaction.nAskOrder)
+binary.Read(bytes.NewBuffer(buf[91:95]), binary.LittleEndian, &transaction.nBidOrder)
+fmt.Println(transaction)
+```
