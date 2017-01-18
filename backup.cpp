@@ -23,7 +23,7 @@
 typedef void* THANDLE;
 #endif
 
-typedef enum
+enum TDB_ERROR
 {
     TDB_SUCCESS = 0,
 
@@ -34,31 +34,31 @@ typedef enum
     TDB_LOGIN_FAILED = -5,      //登陆失败
     TDB_INVALID_PARAMS=-11,     //无效的参数
     TDB_INVALID_CODE_TYPE,      //无效的代码类型，比如向TDB_GetFuture传入非期货类型代码，返回之。
+    
+    
+    TDB_WRONG_FORMULA=-50,      //指标公式错误        
+};
 
 
-    TDB_WRONG_FORMULA=-50,      //指标公式错误
-}TDB_ERROR;
 
-
-
-typedef enum
+enum TDB_PROXY_TYPE
 {
 	TDB_PROXY_SOCK4,
 	TDB_PROXY_SOCK4A,
 	TDB_PROXY_SOCK5,
 	TDB_PROXY_HTTP11,
-}TDB_PROXY_TYPE;
+};
 
-typedef struct
+struct TDB_PROXY_SETTING
 {
 	TDB_PROXY_TYPE nProxyType;
 	char szProxyHostIp[64];
 	char szProxyPort[8];
 	char szProxyUser[32];
 	char szProxyPwd[32];
-}TDB_PROXY_SETTING;
+};
 
-typedef struct
+struct OPEN_SETTINGS
 {
     char szIP[24];              //服务器ip地址
     char szPort[8];             //服务器端口
@@ -68,7 +68,7 @@ typedef struct
     unsigned int nTimeOutVal;   //获取数据时，指定网络超时（秒数，为0则设为2分钟），若超过nTimeOutVal秒后未收到回应数据包，则内部会关闭连接
     unsigned int nRetryCount;   //获取数据时，若掉线，指定重连次数（为0则不重连），若重连nRetryCount次之后仍掉线，则返回网络错误
     unsigned int nRetryGap;     //掉线之后重连的时间间隔（秒数，为0则设为1秒）
-}OPEN_SETTINGS;
+};
 
 //复权方式
 typedef enum REFILLFLAG
@@ -76,9 +76,9 @@ typedef enum REFILLFLAG
     REFILL_NONE = 0,        //不复权
     REFILL_BACKWARD=1,      //全程向前复权（从现在向过去）
     REFILL_FORWARD=2,       //全程向后复权（从过去向现在）
-}REFILLFLAG;
+} ;
 
-typedef enum
+typedef enum CYCTYPE
 {
     CYC_SECOND,
     CYC_MINUTE,
@@ -89,29 +89,29 @@ typedef enum
     CYC_HAFLYEAR,
     CYC_YEAR,
     CYC_TICKBAR,
-}CYCTYPE;
+};
 
 //买卖方向
-typedef enum
+typedef enum ORDERSIDE
 {
     ORDERSIDE_BID = 0,      //买
     ORDERSIDE_ASK,          //卖
-}ORDERSIDE;
+} ;
 
 
 ///系统消息结构体////////////////////////////////////////////////////
 
 //登录回报
-typedef struct
+struct TDBDefine_ResLogin
 {
     char szInfo[64];             //信息
     int  nMarkets;               //支持市场个数
     char szMarket[256][24];       //市场标志(SZ, SH, CF, SHF, DCE, CZC,...)
     int  nDynDate[256];          //动态数据日期
-}TDBDefine_ResLogin;
+};
 
 ///基本消息结构体////////////////////////////////////////////////////
-typedef struct
+struct TDBDefine_Code
 {
     char chWindCode[32];        //万得代码(ag1312.SHF)
     char chCode[32];            //交易所代码(ag1312)
@@ -119,11 +119,11 @@ typedef struct
     char chCNName[32];          //证券中文名称
     char chENName[32];          //证券英文名称
     int  nType;                 //证券类型
-}TDBDefine_Code;
+};
 
 ///行情消息结构体////////////////////////////////////////////////////
 //K线数据 KLine
-typedef struct
+struct TDBDefine_ReqKLine
 {
     char chCode[32];            //证券万得代码(ag1312.SHF)
 	char chMarketKey[24];		//市场设置,如：SH-1-0;SZ-2-0
@@ -134,12 +134,12 @@ typedef struct
     int nCycDef;                //周期数量：仅当nCycType取值：秒、分钟、日线、周线、月线时，这个字段有效。
     int nAutoComplete;          //自动补齐：仅1秒钟线、1分钟线支持这个标志，（1：补齐；0：不补齐）
     int nBeginDate;             //开始日期(交易日,0:从今天开始)
-    int nEndDate;               //结束日期(交易日,=0:跟nBeginDate一样)
+    int nEndDate;               //结束日期(交易日,=0:跟nBeginDate一样) 
     int nBeginTime;             //开始时间，=0表示从开始，格式：（HHMMSSmmm）例如94500000 表示 9点45分00秒000毫秒
     int nEndTime;               //结束时间，=0表示到结束，格式：（HHMMSSmmm）例如94500000 表示 9点45分00秒000毫秒
-}TDBDefine_ReqKLine;
+};
 
-typedef struct
+struct TDBDefine_KLine
 {
     char chWindCode[32];            //万得代码(ag1312.SHF)
     char chCode[32];                //交易所代码(ag1312)
@@ -149,13 +149,13 @@ typedef struct
     int    nHigh;                   //最高((a double number + 0.00005) *10000)
     int    nLow;                    //最低((a double number + 0.00005) *10000)
     int    nClose;                  //收盘((a double number + 0.00005) *10000)
-    __int64  iVolume;                //成交量
+    __int64 iVolume;                //成交量
     __int64    iTurover;            //成交额(元)
     int    nMatchItems;             //成交笔数
     int nInterest;                  //持仓量(期货)、IOPV(基金)、利息(债券)
-}TDBDefine_KLine;
+};
 
-typedef struct
+struct TDBDefine_Tick
 {
     char chWindCode[32];                //万得代码(ag1312.SHF)
     char chCode[32];                    //交易所代码(ag1312)
@@ -174,7 +174,7 @@ typedef struct
     int nLow;                           //最低((a double number + 0.00005) *10000)
     int    nOpen;                       //开盘((a double number + 0.00005) *10000)
     int    nPreClose;                   //前收盘((a double number + 0.00005) *10000)
-
+	
 	//期货字段
 	int nSettle;                        //结算价((a double number + 0.00005) *10000)
 	int nPosition;                       //持仓量
@@ -191,7 +191,7 @@ typedef struct
 	int    nBidAvPrice;                 //加权平均叫买价(上海L2)((a double number + 0.00005) *10000)
 	__int64  iTotalAskVolume;           //叫卖总量(上海L2)
 	__int64  iTotalBidVolume;           //叫买总量(上海L2)
-
+   
 	//下面的字段指数使用
     int        nIndex;                  //不加权指数
     int        nStocks;                 //品种总数
@@ -203,9 +203,9 @@ typedef struct
 	int nResv1;//保留字段1
 	int nResv2;//保留字段2
 	int nResv3;//保留字段3
-}TDBDefine_Tick;
+};
 
-typedef struct
+struct TDBDefine_ReqTick
 {
     char chCode[32];			//证券万得代码(ag1312.SHF)
 	char chMarketKey[24];		//市场设置,如：SH-1-0;SZ-2-0
@@ -214,20 +214,20 @@ typedef struct
     int  nEndTime;				//结束时间：若0则至最后
 
 	int nAutoComplete;			//自动补齐标志:( 0：不自动补齐，1:自动补齐）,暂不支持
-}TDBDefine_ReqTick;
+};
 
 
 //逐笔成交数据 Transaction
-typedef struct
+struct TDBDefine_ReqTransaction
 {
     char chCode[32];            //证券万得代码(ag1312.SHF)
 	char chMarketKey[24];		//市场设置,如：SH-1-0;SZ-2-0
     int  nDate;					//开始日期（交易日），格式YYMMDD
     int  nBeginTime;            //开始时间:0表示从0开始，格式：HHMMSSmmm
     int  nEndTime;              //结束时间：0表示到最后
-}TDBDefine_ReqTransaction;
+};
 
-typedef struct
+struct TDBDefine_Transaction
 {
     char    chWindCode[32];     //万得代码(ag1312.SHF)
     char    chCode[32];         //交易所代码(ag1312)
@@ -241,12 +241,12 @@ typedef struct
     int     nTradeVolume;       //成交数量
     int     nAskOrder;          //叫卖序号
     int     nBidOrder;          //叫买序号
-}TDBDefine_Transaction;
+};
 
-//逐笔委托数据 Order (SZ Level2 Only)
+//逐笔委托数据 Order (SZ Level2 Only) 
 typedef struct TDBDefine_ReqTransaction TDBDefine_ReqOrder ;
 
-typedef struct
+struct TDBDefine_Order
 {
     char chWindCode[32];        //万得代码(ag1312.SHF)
     char chCode[32];            //交易所代码(ag1312)
@@ -258,12 +258,12 @@ typedef struct
     char chFunctionCode;        //委托代码, B, S, C
     int  nOrderPrice;           //委托价格((a double number + 0.00005) *10000)
     int  nOrderVolume;          //委托数量
-}TDBDefine_Order;
+};
 
 //委托队列数据 OrderQueue
 typedef struct TDBDefine_ReqTransaction TDBDefine_ReqOrderQueue;
 
-typedef struct
+struct TDBDefine_OrderQueue
 {
     char    chWindCode[32];         //万得代码(ag1312.SHF)
     char    chCode[32];             //交易所代码(ag1312)
@@ -274,28 +274,28 @@ typedef struct
     int     nOrderItems;            //订单数量
     int     nABItems;               //明细个数
     int     nABVolume[50];          //订单明细
-}TDBDefine_OrderQueue;
+};
 
-typedef struct
+struct TDBDefine_AddFormulaRes
 {
     int nErrLine;           //错误行
     char chText[132];       //错误行指标公式正文
     char chInfo[68];        //错误信息
-}TDBDefine_AddFormulaRes;
+};
 
-typedef struct
+struct TDBDefine_FormulaItem
 {
     char chFormulaName[28];    //指标公式名称
     char chParam[132];         //参数
-}TDBDefine_FormulaItem;
+};
 
-typedef struct
+struct TDBDefine_DelFormulaRes
 {
     char chFormularName[28];    //删除的指标名称
     char chInfo[68];            //删除信息
-}TDBDefine_DelFormulaRes;
+};
 
-typedef struct
+struct TDBDefine_CalcFormulaRes
 {
     char chWindCode[32];        //万得代码(ag1312.SHF)
     char chCode[32];            //交易所代码(ag1312)
@@ -305,11 +305,11 @@ typedef struct
 
     char chFieldName[50][28];   //字段名称，
     int* dataFileds[50];        //最多50个字段，如果有日期和时间字段，总是排在前面
-}TDBDefine_CalcFormulaRes;
+};
 
 
 //请求计算指标公式
-typedef struct
+struct TDBDefine_ReqCalcFormula
 {
     char chFormulaName[28]; //公式名称
     char chParam[32];       //参数, "N1=5,N2=10, N3='000001'
@@ -325,8 +325,9 @@ typedef struct
     int  nCQDate;           //除权日期
     int  nCalcMaxItems;     //计算的最大数据量
     int  nResultMaxItems;   //传送的结果最大数据量
-}TDBDefine_ReqCalcFormula;
+};
 
 #pragma pack(pop)
 
 #endif//_TDBAPISTRUCT_H_
+
