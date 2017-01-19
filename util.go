@@ -17,6 +17,7 @@ import (
 	"os"
 	"bytes"
 	"encoding/binary"
+	//"code.google.com/p/mahonia"
 )
 
 type TDBDefine_ReqTick struct{
@@ -472,6 +473,13 @@ func UseEZFFormula(hTdb C.THANDLE) {
 	//添加公式到服务器并编译，若不过，会有错误返回
 	var addRes *C.TDBDefine_AddFormulaRes = new(C.TDBDefine_AddFormulaRes)
 	nErr := C.TDB_AddFormula(hTdb, C.CString(strName), C.CString(strContent),addRes)
+	/*chInfo := Char2byte(uintptr(unsafe.Pointer(&addRes.chInfo)),unsafe.Sizeof(addRes.chInfo[0]),len(addRes.chInfo))
+	fmt.Printf("Add Formula Result:%s\n",chInfo)
+
+	string_chInfo := string(chInfo)
+	enc := mahonia.NewEncoder("UTF-8")
+	strr := enc.ConvertString(string_chInfo)
+	fmt.Println(strr)*/
 	fmt.Printf("Add Formula Result:%s\n",Char2byte(uintptr(unsafe.Pointer(&addRes.chInfo)),unsafe.Sizeof(addRes.chInfo[0]),len(addRes.chInfo)))
 //======================================================================================================
 /*	var filename string = "./output1.txt"
