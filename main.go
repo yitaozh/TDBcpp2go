@@ -1,7 +1,7 @@
 package main
 
 /*
-#cgo LDFLAGS:-lTDBAPI -lstdc++
+#cgo LDFLAGS:-lTDBAPI
 #include "include/TDBAPI.h"
 #include "include/TDBAPIStruct.h"
 #include <stdlib.h>
@@ -75,8 +75,8 @@ func main(){
 
 	}*/
 	//GetKData(hTdb, "600715.SH", "SH-2-0", 20151126, 20151126, C.CYC_MINUTE, 0, 0, 1);	//autocomplete k-minute
-	//GetTickData(hTdb, "000001.sz", "SZ-2-0", 20150910);					//tick
-	GetTransaction(hTdb, "000001.sz", "SZ-2-0", 20150910);					//Transaction
+	GetTickData(hTdb, "000001.sz", "SZ-2-0", 20150910);					//tick
+	//GetTransaction(hTdb, "000001.sz", "SZ-2-0", 20150910);					//Transaction
 	//GetOrder(hTdb, "000001.sz", "SZ-2-0", 20150910);					//Order
 	//GetOrderQueue(hTdb, "000001.sz", "SZ-2-0", 20150910);					//OrderQueue
 	//UseEZFFormula(hTdb);									//test for formula
