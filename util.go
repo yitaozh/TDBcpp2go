@@ -339,6 +339,28 @@ func GetTransaction(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int
 	binary.Read(bytes.NewBuffer(buf[87:91]), binary.LittleEndian, &transaction.nAskOrder)
 	binary.Read(bytes.NewBuffer(buf[91:95]), binary.LittleEndian, &transaction.nBidOrder)
 	fmt.Println(transaction)
+
+	tmpPtr := uintptr(unsafe.Pointer(pTransaction))
+	sizeOf := unsafe.Sizeof(*pTransaction)
+	fmt.Println("Length:", sizeOf)
+	tmpPtr = tmpPtr + sizeOf - 1
+	pT := (*C.TDBDefine_Transaction)(unsafe.Pointer(tmpPtr))
+	l = unsafe.Sizeof(*pT)
+	buf = (*[1024]byte)(unsafe.Pointer(pT))
+
+	binary.Read(bytes.NewBuffer(buf[0:32]), binary.LittleEndian, &transaction.chWindCode)
+	binary.Read(bytes.NewBuffer(buf[32:64]), binary.LittleEndian, &transaction.chCode)
+	binary.Read(bytes.NewBuffer(buf[64:68]), binary.LittleEndian, &transaction.nDate)
+	binary.Read(bytes.NewBuffer(buf[68:72]), binary.LittleEndian, &transaction.nTime)
+	binary.Read(bytes.NewBuffer(buf[72:76]), binary.LittleEndian, &transaction.nIndex)
+	binary.Read(bytes.NewBuffer(buf[76:77]), binary.LittleEndian, &transaction.chFunctionCode)
+	binary.Read(bytes.NewBuffer(buf[77:78]), binary.LittleEndian, &transaction.chOrderKind)
+	binary.Read(bytes.NewBuffer(buf[78:79]), binary.LittleEndian, &transaction.chBSFlag)
+	binary.Read(bytes.NewBuffer(buf[79:83]), binary.LittleEndian, &transaction.nTradePrice)
+	binary.Read(bytes.NewBuffer(buf[83:87]), binary.LittleEndian, &transaction.nTradeVolume)
+	binary.Read(bytes.NewBuffer(buf[87:91]), binary.LittleEndian, &transaction.nAskOrder)
+	binary.Read(bytes.NewBuffer(buf[91:95]), binary.LittleEndian, &transaction.nBidOrder)
+	fmt.Println(transaction)
 	//================================================================================
 	/*fmt.Println("-----------------------Transaction Data----------------------------")
 	fmt.Printf("收到 %d 条逐笔成交消息，打印 1/10000 条\n", pCount)
