@@ -45,3 +45,7 @@ binary.Read(bytes.NewBuffer(buf[87:91]), binary.LittleEndian, &transaction.nAskO
 binary.Read(bytes.NewBuffer(buf[91:95]), binary.LittleEndian, &transaction.nBidOrder)
 fmt.Println(transaction)
 ```
+事实上也可以不用这么麻烦，只要知道了下一个结构体的地址在当前结构体地址+size然后-1或者-2后，可以直接用unsafe.Pointer去访问输出。
+
+### 数字到string的转换，有strconv包里的几个函数,其中strconv.Itoa(int)可以把一个int型数转换为string，strconv.FormatUint(uint64, base)可以把一个uint64型数转换成base进制后再变成string
+
