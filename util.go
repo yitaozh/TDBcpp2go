@@ -1,7 +1,7 @@
 package main
 
 /*
-#cgo LDFLAGS: -lTDBAPI -lstdc++
+#cgo LDFLAGS: -lTDBAPI
 #include "include/TDBAPI.h"
 #include "include/TDBAPIStruct.h"
 #include <stdlib.h>
@@ -12,7 +12,6 @@ import (
 	"fmt"
 	"time"
 	"unsafe"
-	"strconv"
 	//"io"
 	"os"
 	"bytes"
@@ -20,53 +19,53 @@ import (
 	//"code.google.com/p/mahonia"
 )
 
-type TDBDefine_ReqTick struct{
+type Define_Tick struct{
 	chWindCode [32]byte         	//万得代码(ag1312.SHF)
 	chCode [32]byte			//交易所代码(ag1312)
-	nDate int                       //日期（自然日）
-	nTime int                       //时间（HHMMSSmmm）例如94500000 表示 9点45分00秒000毫秒
-	nPrice int                      //成交价((a double number + 0.00005) *10000)
-	iVolume int     	     	//成交量
-	iTurover int                	//成交额(元)
-	nMatchItems int                 //成交笔数
-	nInterest int                   //IOPV(基金)、利息(债券)
+	nDate int32                       //日期（自然日）
+	nTime int32                       //时间（HHMMSSmmm）例如94500000 表示 9点45分00秒000毫秒
+	nPrice int32                      //成交价((a double number + 0.00005) *10000)
+	iVolume int64     	     	//成交量
+	iTurover int64                	//成交额(元)
+	nMatchItems int32                 //成交笔数
+	nInterest int32                   //IOPV(基金)、利息(债券)
 	chTradeFlag byte                //成交标志
 	chBSFlag byte                 	//BS标志
- 	iAccVolume int                 	//当日累计成交量
-    	iAccTurover int             	//当日成交额(元)
- 	nHigh int                   	//最高((a double number + 0.00005) *10000)
- 	nLow int                      	//最低((a double number + 0.00005) *10000)
-    	nOpen int                       //开盘((a double number + 0.00005) *10000)
-    	nPreClose int                   //前收盘((a double number + 0.00005) *10000)
+ 	iAccVolume int64                 	//当日累计成交量
+    	iAccTurover int64             	//当日成交额(元)
+ 	nHigh int32                   	//最高((a double number + 0.00005) *10000)
+ 	nLow int32                      	//最低((a double number + 0.00005) *10000)
+    	nOpen int32                       //开盘((a double number + 0.00005) *10000)
+    	nPreClose int32                  //前收盘((a double number + 0.00005) *10000)
 
 	//期货字段
- 	nSettle int               	//结算价((a double number + 0.00005) *10000)
- 	nPosition int           	//持仓量
-	nCurDelta int                  	//虚实度
- 	nPreSettle int                	//昨结算((a double number + 0.00005) *10000)
- 	nPrePosition int              	//昨持仓
+ 	nSettle int32               	//结算价((a double number + 0.00005) *10000)
+ 	nPosition int32           	//持仓量
+	nCurDelta int32                  	//虚实度
+ 	nPreSettle int32                	//昨结算((a double number + 0.00005) *10000)
+ 	nPrePosition int32              	//昨持仓
 
 	//买卖盘字段
-    	nAskPrice[10] int               //叫卖价((a double number + 0.00005) *10000)
+    	nAskPrice[10] int32               //叫卖价((a double number + 0.00005) *10000)
  	nAskVolume[10] uint           	//叫卖量
-    	nBidPrice[10] int               //叫买价((a double number + 0.00005) *10000)
+    	nBidPrice[10] int32               //叫买价((a double number + 0.00005) *10000)
  	nBidVolume[10] uint          	//叫买量
-    	nAskAvPrice int                 //加权平均叫卖价(上海L2)((a double number + 0.00005) *10000)
-    	nBidAvPrice int                 //加权平均叫买价(上海L2)((a double number + 0.00005) *10000)
-  	iTotalAskVolume int         	//叫卖总量(上海L2)
-  	iTotalBidVolume int         	//叫买总量(上海L2)
+    	nAskAvPrice int32                 //加权平均叫卖价(上海L2)((a double number + 0.00005) *10000)
+    	nBidAvPrice int32                 //加权平均叫买价(上海L2)((a double number + 0.00005) *10000)
+  	iTotalAskVolume int64         	//叫卖总量(上海L2)
+  	iTotalBidVolume int64         	//叫买总量(上海L2)
 
 	//下面的字段指数使用
-        nIndex int               	//不加权指数
-        nStocks int             	//品种总数
-        nUps int               		//上涨品种数
-        nDowns int               	//下跌品种数
-        nHoldLines int             	//持平品种数
+        nIndex int32               	//不加权指数
+        nStocks int32             	//品种总数
+        nUps int32               		//上涨品种数
+        nDowns int32               	//下跌品种数
+        nHoldLines int32             	//持平品种数
 
 	//保留字段
- 	nResv1 int//保留字段1
- 	nResv2 int//保留字段2
- 	nResv3 int//保留字段3
+ 	nResv1 int32//保留字段1
+ 	nResv2 int32//保留字段2
+ 	nResv3 int32//保留字段3
 }
 
 type Define_Transaction struct{
@@ -82,6 +81,19 @@ type Define_Transaction struct{
      	nTradeVolume int32      //成交数量
      	nAskOrder int32         //叫卖序号
      	nBidOrder int32         //叫买序号
+}
+
+type Define_Order struct{
+	chWindCode[32]byte        //万得代码(ag1312.SHF)
+	chCode[32]byte            //交易所代码(ag1312)
+	nDate int32                 //日期（自然日）格式YYMMDD
+	nTime int32                //委托时间（精确到毫秒HHMMSSmmm）
+	nIndex int32                //委托编号
+	nOrder int32                //交易所委托号
+	chOrderKind byte           //委托类别
+	chFunctionCode byte        //委托代码, B, S, C
+	nOrderPrice int32           //委托价格((a double number + 0.00005) *10000)
+	nOrderVolume int32         //委托数量
 }
 
 func check(e error)  {
@@ -121,37 +133,25 @@ func GetTickCount() int64 {
 	return time.Now().Unix()
 }
 
-func array2str(arr [10]C.int, len int) string {
+func array2str4int(arr [10]int32, len int) string {
 	var str string
 	for i:=0; i<len; i++ {
 		if i==len-1 {
-			str += strconv.Itoa(int(arr[i])) + " "
+			str += string(arr[i]) + " "
 		}else {
-			str += strconv.Itoa(int(arr[i])) + ","
+			str += string(arr[i]) + ","
 		}
 	}
 	return str
 }
 
-func array2str4uint(arr [10]C.uint, len int) string {
+func array2str4uint(arr [10]uint, len int) string {
 	var str string
 	for i:=0; i<len; i++ {
 		if i==len-1 {
-			str += strconv.Itoa(int(arr[i])) + " "
+			str += string(arr[i]) + " "
 		}else {
-			str += strconv.Itoa(int(arr[i])) + ","
-		}
-	}
-	return str
-}
-
-func array2str4C(arr [50]C.int, len C.int) string {
-	var str string
-	for i:=0; i<int(len); i++ {
-		if i==int(len-1) {
-			str += strconv.Itoa(int(arr[i])) + " "
-		}else {
-			str += strconv.Itoa(int(arr[i])) + ","
+			str += string(arr[i]) + ","
 		}
 	}
 	return str
@@ -227,7 +227,7 @@ func GetKData(hTdb C.THANDLE, szCode string, szMarket string, nBeginDate int, nE
 }
 
 //tested good
-/*
+
 func GetTickData(hTdb C.THANDLE, szCode string, szMarket string, nDate int)  {
 	var req C.TDBDefine_ReqTick
 	String2char(szCode,uintptr(unsafe.Pointer(&req.chCode)),unsafe.Sizeof(req.chCode[0]))
@@ -241,6 +241,7 @@ func GetTickData(hTdb C.THANDLE, szCode string, szMarket string, nDate int)  {
 	var pCount C.int
 	C.TDB_GetTick(hTdb,&req,&pTick, &pCount)
 
+	var tick Define_Tick
 	fmt.Println("------------------------Tick Data---------------------------")
 	fmt.Printf("共收到 %d 条Tick数据， 打印 1/100 条：\n", pCount)
 
@@ -248,40 +249,80 @@ func GetTickData(hTdb C.THANDLE, szCode string, szMarket string, nDate int)  {
 	sizeOf := unsafe.Sizeof(*pTick)
 	for i:=0; i<int(pCount); {
 		pT := (*C.TDBDefine_Tick)(unsafe.Pointer(tmpPtr))
-		fmt.Printf("万得代码 chWindCode:%s \n", Char2byte(uintptr(unsafe.Pointer(&pT.chWindCode)),unsafe.Sizeof(pT.chWindCode[0]),len(pT.chWindCode)))
-		fmt.Printf("日期 nDate:%d \n", pT.nDate)
-		fmt.Printf("时间 nTime:%d \n", pT.nTime)
+		buf := (*[1024]byte)(unsafe.Pointer(pT))
+		binary.Read(bytes.NewBuffer(buf[0:32]), binary.LittleEndian, &tick.chWindCode)
+		binary.Read(bytes.NewBuffer(buf[32:64]), binary.LittleEndian, &tick.chCode)
+		binary.Read(bytes.NewBuffer(buf[64:68]), binary.LittleEndian, &tick.nDate)
+		binary.Read(bytes.NewBuffer(buf[68:72]), binary.LittleEndian, &tick.nTime)
+		binary.Read(bytes.NewBuffer(buf[72:76]), binary.LittleEndian, &tick.nPrice)
+		binary.Read(bytes.NewBuffer(buf[76:84]), binary.LittleEndian, &tick.iVolume)
+		binary.Read(bytes.NewBuffer(buf[84:92]), binary.LittleEndian, &tick.iTurover)
+		binary.Read(bytes.NewBuffer(buf[92:96]), binary.LittleEndian, &tick.nMatchItems)
+		binary.Read(bytes.NewBuffer(buf[96:100]), binary.LittleEndian, &tick.nInterest)
+		binary.Read(bytes.NewBuffer(buf[100:101]), binary.LittleEndian, &tick.chTradeFlag)
+		binary.Read(bytes.NewBuffer(buf[101:102]), binary.LittleEndian, &tick.chBSFlag)
+		binary.Read(bytes.NewBuffer(buf[102:110]), binary.LittleEndian, &tick.iAccVolume)
+		binary.Read(bytes.NewBuffer(buf[110:118]), binary.LittleEndian, &tick.iAccTurover)
+		binary.Read(bytes.NewBuffer(buf[118:122]), binary.LittleEndian, &tick.nHigh)
+		binary.Read(bytes.NewBuffer(buf[122:126]), binary.LittleEndian, &tick.nLow)
+		binary.Read(bytes.NewBuffer(buf[126:130]), binary.LittleEndian, &tick.nOpen)
+		binary.Read(bytes.NewBuffer(buf[130:134]), binary.LittleEndian, &tick.nPreClose)
+		binary.Read(bytes.NewBuffer(buf[134:138]), binary.LittleEndian, &tick.nSettle)
+		binary.Read(bytes.NewBuffer(buf[138:142]), binary.LittleEndian, &tick.nPosition)
+		binary.Read(bytes.NewBuffer(buf[142:146]), binary.LittleEndian, &tick.nCurDelta)
+		binary.Read(bytes.NewBuffer(buf[146:150]), binary.LittleEndian, &tick.nPreSettle)
+		binary.Read(bytes.NewBuffer(buf[150:154]), binary.LittleEndian, &tick.nPrePosition)
+		binary.Read(bytes.NewBuffer(buf[154:194]), binary.LittleEndian, &tick.nAskPrice)
+		binary.Read(bytes.NewBuffer(buf[194:234]), binary.LittleEndian, &tick.nAskVolume)
+		binary.Read(bytes.NewBuffer(buf[234:274]), binary.LittleEndian, &tick.nBidPrice)
+		binary.Read(bytes.NewBuffer(buf[274:314]), binary.LittleEndian, &tick.nBidVolume)
+		binary.Read(bytes.NewBuffer(buf[314:318]), binary.LittleEndian, &tick.nAskAvPrice)
+		binary.Read(bytes.NewBuffer(buf[318:322]), binary.LittleEndian, &tick.nBidAvPrice)
+		binary.Read(bytes.NewBuffer(buf[322:330]), binary.LittleEndian, &tick.iTotalAskVolume)
+		binary.Read(bytes.NewBuffer(buf[330:338]), binary.LittleEndian, &tick.iTotalBidVolume)
+		binary.Read(bytes.NewBuffer(buf[338:342]), binary.LittleEndian, &tick.nIndex)
+		binary.Read(bytes.NewBuffer(buf[342:346]), binary.LittleEndian, &tick.nStocks)
+		binary.Read(bytes.NewBuffer(buf[346:350]), binary.LittleEndian, &tick.nUps)
+		binary.Read(bytes.NewBuffer(buf[350:354]), binary.LittleEndian, &tick.nDowns)
+		binary.Read(bytes.NewBuffer(buf[354:358]), binary.LittleEndian, &tick.nHoldLines)
+		binary.Read(bytes.NewBuffer(buf[358:362]), binary.LittleEndian, &tick.nResv1)
+		binary.Read(bytes.NewBuffer(buf[362:366]), binary.LittleEndian, &tick.nResv2)
+		binary.Read(bytes.NewBuffer(buf[366:370]), binary.LittleEndian, &tick.nResv3)
 
-		fmt.Printf("成交价 nPrice:%d \n", pT.nPrice)
-		fmt.Printf("成交量 iVolume:%d \n", pT.iVolume)
-		fmt.Printf("成交额(元) iTurover:%d \n", pT.iTurover)
-		fmt.Printf("成交笔数 nMatchItems:%d \n", pT.nMatchItems)
-		fmt.Printf(" nInterest:%d \n", pT.nInterest)
+		fmt.Printf("万得代码 chWindCode:%s \n", tick.chWindCode)
+		fmt.Printf("日期 nDate:%d \n", tick.nDate)
+		fmt.Printf("时间 nTime:%d \n", tick.nTime)
 
-		fmt.Printf("成交标志: chTradeFlag:%c \n", pT.chTradeFlag)
-		fmt.Printf("BS标志: chBSFlag:%c \n", pT.chBSFlag)
-		fmt.Printf("当日成交量: iAccVolume:%d \n", pT.iAccVolume)
-		fmt.Printf("当日成交额: iAccTurover:%v \n", pT.iAccTurover)
+		fmt.Printf("成交价 nPrice:%d \n", tick.nPrice)
+		fmt.Printf("成交量 iVolume:%d \n", tick.iVolume)
+		fmt.Printf("成交额(元) iTurover:%d \n", tick.iTurover)
+		fmt.Printf("成交笔数 nMatchItems:%d \n", tick.nMatchItems)
+		fmt.Printf(" nInterest:%d \n", tick.nInterest)
 
-		fmt.Printf("最高 nHigh:%d \n", pT.nHigh)
-		fmt.Printf("最低 nLow:%d \n", pT.nLow)
-		fmt.Printf("开盘 nOpen:%d \n", pT.nOpen)
-		fmt.Printf("前收盘 nPreClose:%d \n", pT.nPreClose)
+		fmt.Printf("成交标志: chTradeFlag:%c \n", tick.chTradeFlag)
+		fmt.Printf("BS标志: chBSFlag:%c \n", tick.chBSFlag)
+		fmt.Printf("当日成交量: iAccVolume:%d \n", tick.iAccVolume)
+		fmt.Printf("当日成交额: iAccTurover:%v \n", tick.iAccTurover)
+
+		fmt.Printf("最高 nHigh:%d \n", tick.nHigh)
+		fmt.Printf("最低 nLow:%d \n", tick.nLow)
+		fmt.Printf("开盘 nOpen:%d \n",tick.nOpen)
+		fmt.Printf("前收盘 nPreClose:%d \n", tick.nPreClose)
 
 		//买卖盘字段
 		var strOut string
-		strOut = array2str(pT.nAskPrice, 10)
+		strOut = array2str4int(tick.nAskPrice, 10)
 		fmt.Printf("叫卖价 nAskPrice:%s \n", strOut)
-		strOut = array2str4uint(pT.nAskVolume, 10)
+		strOut = array2str4uint(tick.nAskVolume, 10)
 		fmt.Printf("叫卖量 nAskVolume:%s \n", strOut)
-		strOut = array2str(pT.nBidPrice, 10)
+		strOut = array2str4int(tick.nBidPrice, 10)
 		fmt.Printf("叫买价 nBidPrice:%s \n", strOut)
-		strOut = array2str4uint(pT.nBidVolume, 10)
+		strOut = array2str4uint(tick.nBidVolume, 10)
 		fmt.Printf("叫买量 nBidVolume:%s \n", strOut)
-		fmt.Printf("加权平均叫卖价 nAskAvPrice:%d \n", pT.nAskAvPrice)
-		fmt.Printf("加权平均叫买价 nBidAvPrice:%d \n", pT.nBidAvPrice)
-		fmt.Printf("叫卖总量 iTotalAskVolume:%v \n", pT.iTotalAskVolume)
-		fmt.Printf("叫买总量 iTotalBidVolume:%v \n", pT.iTotalBidVolume)
+		fmt.Printf("加权平均叫卖价 nAskAvPrice:%d \n", tick.nAskAvPrice)
+		fmt.Printf("加权平均叫买价 nBidAvPrice:%d \n", tick.nBidAvPrice)
+		fmt.Printf("叫卖总量 iTotalAskVolume:%v \n", tick.iTotalAskVolume)
+		fmt.Printf("叫买总量 iTotalBidVolume:%v \n", tick.iTotalBidVolume)
 
 
 		//期货字段
@@ -300,11 +341,11 @@ func GetTickData(hTdb C.THANDLE, szCode string, szMarket string, nDate int)  {
 
 
 		fmt.Println("--------------------------------------")
-		i += 100
-		tmpPtr += sizeOf*100
+		i += 1000
+		tmpPtr += sizeOf-2
 	}
 }
-*/
+
 
 //tested good
 func GetTransaction(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int)  {
@@ -318,76 +359,45 @@ func GetTransaction(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int
 	var pTransaction *C.TDBDefine_Transaction = nil
 	var pCount C.int
 	C.TDB_GetTransaction(hTdb,&req, &pTransaction, &pCount)
-	//================================================================================
-	l := unsafe.Sizeof(*pTransaction)
-	buf := (*[1024]byte)(unsafe.Pointer(pTransaction))
-	fmt.Println("Struct:", *pTransaction)
-	fmt.Println("Bytes:", (*buf)[:l])
-	fmt.Println("Length:", l)
+
 	var transaction Define_Transaction
-	//transaction.chWindCode = buf[0:32]
-	//transaction.chCode = string(buf[32:64])
-	binary.Read(bytes.NewBuffer(buf[0:32]), binary.LittleEndian, &transaction.chWindCode)
-	binary.Read(bytes.NewBuffer(buf[32:64]), binary.LittleEndian, &transaction.chCode)
-	binary.Read(bytes.NewBuffer(buf[64:68]), binary.LittleEndian, &transaction.nDate)
-	binary.Read(bytes.NewBuffer(buf[68:72]), binary.LittleEndian, &transaction.nTime)
-	binary.Read(bytes.NewBuffer(buf[72:76]), binary.LittleEndian, &transaction.nIndex)
-	binary.Read(bytes.NewBuffer(buf[76:77]), binary.LittleEndian, &transaction.chFunctionCode)
-	binary.Read(bytes.NewBuffer(buf[77:78]), binary.LittleEndian, &transaction.chOrderKind)
-	binary.Read(bytes.NewBuffer(buf[78:79]), binary.LittleEndian, &transaction.chBSFlag)
-	binary.Read(bytes.NewBuffer(buf[79:83]), binary.LittleEndian, &transaction.nTradePrice)
-	binary.Read(bytes.NewBuffer(buf[83:87]), binary.LittleEndian, &transaction.nTradeVolume)
-	binary.Read(bytes.NewBuffer(buf[87:91]), binary.LittleEndian, &transaction.nAskOrder)
-	binary.Read(bytes.NewBuffer(buf[91:95]), binary.LittleEndian, &transaction.nBidOrder)
-	fmt.Println(transaction)
-
-	tmpPtr := uintptr(unsafe.Pointer(pTransaction))
-	sizeOf := unsafe.Sizeof(*pTransaction)
-	fmt.Println("Length:", sizeOf)
-	tmpPtr = tmpPtr + sizeOf - 1
-	pT := (*C.TDBDefine_Transaction)(unsafe.Pointer(tmpPtr))
-	l = unsafe.Sizeof(*pT)
-	buf = (*[1024]byte)(unsafe.Pointer(pT))
-
-	binary.Read(bytes.NewBuffer(buf[0:32]), binary.LittleEndian, &transaction.chWindCode)
-	binary.Read(bytes.NewBuffer(buf[32:64]), binary.LittleEndian, &transaction.chCode)
-	binary.Read(bytes.NewBuffer(buf[64:68]), binary.LittleEndian, &transaction.nDate)
-	binary.Read(bytes.NewBuffer(buf[68:72]), binary.LittleEndian, &transaction.nTime)
-	binary.Read(bytes.NewBuffer(buf[72:76]), binary.LittleEndian, &transaction.nIndex)
-	binary.Read(bytes.NewBuffer(buf[76:77]), binary.LittleEndian, &transaction.chFunctionCode)
-	binary.Read(bytes.NewBuffer(buf[77:78]), binary.LittleEndian, &transaction.chOrderKind)
-	binary.Read(bytes.NewBuffer(buf[78:79]), binary.LittleEndian, &transaction.chBSFlag)
-	binary.Read(bytes.NewBuffer(buf[79:83]), binary.LittleEndian, &transaction.nTradePrice)
-	binary.Read(bytes.NewBuffer(buf[83:87]), binary.LittleEndian, &transaction.nTradeVolume)
-	binary.Read(bytes.NewBuffer(buf[87:91]), binary.LittleEndian, &transaction.nAskOrder)
-	binary.Read(bytes.NewBuffer(buf[91:95]), binary.LittleEndian, &transaction.nBidOrder)
-	fmt.Println(transaction)
-	//================================================================================
-	/*fmt.Println("-----------------------Transaction Data----------------------------")
+	fmt.Println("-----------------------Transaction Data----------------------------")
 	fmt.Printf("收到 %d 条逐笔成交消息，打印 1/10000 条\n", pCount)
 	tmpPtr := uintptr(unsafe.Pointer(pTransaction))
 	sizeOf := unsafe.Sizeof(*pTransaction)
 	for i:=0; i<int(pCount); {
 		pT := (*C.TDBDefine_Transaction)(unsafe.Pointer(tmpPtr))
-		fmt.Printf("成交时间(Date): %d \n", pT.nDate)
-		fmt.Printf("成交时间: %d \n", pT.nTime)
-		fmt.Printf("成交代码: %c \n", byte(pT.chFunctionCode))
-		fmt.Printf("委托类别: %c \n", byte(pT.chOrderKind))
-		fmt.Printf("BS标志: %c \n", byte(pT.chBSFlag))
-		fmt.Printf("成交价格: %d \n", pT.nTradePrice)
-		fmt.Printf("成交数量: %d \n", pT.nTradeVolume)
-		fmt.Printf("叫卖序号: %d \n", pT.nAskOrder)
-		fmt.Printf("叫买序号: %d \n", pT.nBidOrder)
+		buf := (*[1024]byte)(unsafe.Pointer(pT))
+		binary.Read(bytes.NewBuffer(buf[0:32]), binary.LittleEndian, &transaction.chWindCode)
+		binary.Read(bytes.NewBuffer(buf[32:64]), binary.LittleEndian, &transaction.chCode)
+		binary.Read(bytes.NewBuffer(buf[64:68]), binary.LittleEndian, &transaction.nDate)
+		binary.Read(bytes.NewBuffer(buf[68:72]), binary.LittleEndian, &transaction.nTime)
+		binary.Read(bytes.NewBuffer(buf[72:76]), binary.LittleEndian, &transaction.nIndex)
+		binary.Read(bytes.NewBuffer(buf[76:77]), binary.LittleEndian, &transaction.chFunctionCode)
+		binary.Read(bytes.NewBuffer(buf[77:78]), binary.LittleEndian, &transaction.chOrderKind)
+		binary.Read(bytes.NewBuffer(buf[78:79]), binary.LittleEndian, &transaction.chBSFlag)
+		binary.Read(bytes.NewBuffer(buf[79:83]), binary.LittleEndian, &transaction.nTradePrice)
+		binary.Read(bytes.NewBuffer(buf[83:87]), binary.LittleEndian, &transaction.nTradeVolume)
+		binary.Read(bytes.NewBuffer(buf[87:91]), binary.LittleEndian, &transaction.nAskOrder)
+		binary.Read(bytes.NewBuffer(buf[91:95]), binary.LittleEndian, &transaction.nBidOrder)
+		fmt.Printf("成交时间(Date): %d \n", transaction.nDate)
+		fmt.Printf("成交时间: %d \n", transaction.nTime)
+		fmt.Printf("成交代码: %c \n", transaction.chFunctionCode)
+		fmt.Printf("委托类别: %c \n", transaction.chOrderKind)
+		fmt.Printf("BS标志: %c \n", transaction.chBSFlag)
+		fmt.Printf("成交价格: %d \n", transaction.nTradePrice)
+		fmt.Printf("成交数量: %d \n", transaction.nTradeVolume)
+		fmt.Printf("叫卖序号: %d \n", transaction.nAskOrder)
+		fmt.Printf("叫买序号: %d \n", transaction.nBidOrder)
 		fmt.Println("---------------------------------------------")
 		//fmt.Printf("成交编号: %d \n", pT.nBidOrder)
 		i += 10000
-		tmpPtr += sizeOf*10000
-	}*/
-	//================================================================================
+		tmpPtr += (sizeOf-1)*10000
+	}
+
 }
 
 //tested good
-/*
 func GetOrder(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int)  {
 	var req C.TDBDefine_ReqOrder
 	String2char(szCode,uintptr(unsafe.Pointer(&req.chCode)),unsafe.Sizeof(req.chCode[0]))
@@ -400,31 +410,40 @@ func GetOrder(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int)  {
 	var pCount C.int
 	C.TDB_GetOrder(hTdb,&req, &pOrder, &pCount)
 
+	var order Define_Order
 	fmt.Println("-------------------------Transaction Data--------------------------")
 	fmt.Printf("收到 %d 条逐笔委托消息，打印 1/10000 条\n", pCount)
 
 	tmpPtr := uintptr(unsafe.Pointer(pOrder))
 	sizeOf := unsafe.Sizeof(*pOrder)
-	//tmpPtr += 64+4+4+4+2
-	fmt.Printf("委托类别: %c \n", tmpPtr)
 	for i:=0; i<int(pCount); {
-		for i:=0; i<4 ; {
-			pO := (*C.TDBDefine_Order)(unsafe.Pointer(tmpPtr))
-			fmt.Printf("订单时间(Date): %d \n", pO.nDate)
-			fmt.Printf("委托时间(HHMMSSmmm): %d \n", (*C.int)(unsafe.Pointer(uintptr(unsafe.Pointer(pOrder)) + unsafe.Offsetof(pOrder.nTime))))
-			fmt.Printf("委托编号: %d \n", pO.nOrder)
-			fmt.Printf("委托类别: %c \n", pO.chOrderKind)
-			fmt.Printf("委托代码: %c \n", pO.chFunctionCode)
-			fmt.Printf("委托价格: %d \n", pO.nOrderPrice)
-			fmt.Printf("委托数量: %d \n", pO.nOrderVolume)
-			fmt.Println("---------------------------------------------")
-			i += 10000
-			tmpPtr += sizeOf * 10000
-		}
+		pO := (*C.TDBDefine_Order)(unsafe.Pointer(tmpPtr))
+		buf := (*[1024]byte)(unsafe.Pointer(pO))
+		binary.Read(bytes.NewBuffer(buf[0:32]), binary.LittleEndian, &order.chWindCode)
+		binary.Read(bytes.NewBuffer(buf[32:64]), binary.LittleEndian, &order.chCode)
+		binary.Read(bytes.NewBuffer(buf[64:68]), binary.LittleEndian, &order.nDate)
+		binary.Read(bytes.NewBuffer(buf[68:72]), binary.LittleEndian, &order.nTime)
+		binary.Read(bytes.NewBuffer(buf[72:76]), binary.LittleEndian, &order.nIndex)
+		binary.Read(bytes.NewBuffer(buf[76:80]), binary.LittleEndian, &order.nOrder)
+		binary.Read(bytes.NewBuffer(buf[80:81]), binary.LittleEndian, &order.chOrderKind)
+		binary.Read(bytes.NewBuffer(buf[81:82]), binary.LittleEndian, &order.chFunctionCode)
+		binary.Read(bytes.NewBuffer(buf[82:86]), binary.LittleEndian, &order.nOrderPrice)
+		binary.Read(bytes.NewBuffer(buf[86:90]), binary.LittleEndian, &order.nOrderVolume)
+		fmt.Printf("订单时间(Date): %d \n", order.nDate)
+		fmt.Printf("委托时间(HHMMSSmmm): %d \n", order.nTime)
+		fmt.Printf("委托编号: %d \n", order.nOrder)
+		fmt.Printf("委托类别: %c \n", order.chOrderKind)
+		fmt.Printf("委托代码: %c \n", order.chFunctionCode)
+		fmt.Printf("委托价格: %d \n", order.nOrderPrice)
+		fmt.Printf("委托数量: %d \n", order.nOrderVolume)
+		fmt.Println("---------------------------------------------")
+		//fmt.Println(order)
+		i += 10000
+		tmpPtr += (sizeOf-2)*10000
 	}
 
 }
-*/
+
 
 //tested
 /*

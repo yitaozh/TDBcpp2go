@@ -244,7 +244,14 @@ typedef struct
 }TDBDefine_Transaction;
 
 //逐笔委托数据 Order (SZ Level2 Only)
-typedef struct TDBDefine_ReqTransaction TDBDefine_ReqOrder ;
+typedef struct {
+    char chCode[32];            //证券万得代码(AG1312.SHF)
+	char chMarketKey[24];		//市场设置,如：SH-1-0;SZ-2-0
+    int  nDate;            //开始日期（交易日），格式YYMMDD
+    //int  nEndDate;              //数据日期（交易日）小于等于0和nBeginDate相同
+    int  nBeginTime;            //开始时间:<=0表示从0开始，格式：HHMMSSmmm
+    int  nEndTime;              //结束时间：<=0表示到最后
+}TDBDefine_ReqOrder;
 
 typedef struct
 {
@@ -261,7 +268,14 @@ typedef struct
 }TDBDefine_Order;
 
 //委托队列数据 OrderQueue
-typedef struct TDBDefine_ReqTransaction TDBDefine_ReqOrderQueue;
+typedef struct {
+    char chCode[32];            //证券万得代码(AG1312.SHF)
+	char chMarketKey[24];		//市场设置,如：SH-1-0;SZ-2-0
+    int  nDate;            //开始日期（交易日），格式YYMMDD
+    //int  nEndDate;              //数据日期（交易日）小于等于0和nBeginDate相同
+    int  nBeginTime;            //开始时间:<=0表示从0开始，格式：HHMMSSmmm
+    int  nEndTime;              //结束时间：<=0表示到最后
+}TDBDefine_ReqOrderQueue;
 
 typedef struct
 {
