@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"time"
 	"unsafe"
+	"strconv"
 	//"io"
 	"os"
 	"bytes"
@@ -47,9 +48,9 @@ type Define_Tick struct{
 
 	//买卖盘字段
     	nAskPrice[10] int32               //叫卖价((a double number + 0.00005) *10000)
- 	nAskVolume[10] uint           	//叫卖量
+ 	nAskVolume[10] uint32           	//叫卖量
     	nBidPrice[10] int32               //叫买价((a double number + 0.00005) *10000)
- 	nBidVolume[10] uint          	//叫买量
+ 	nBidVolume[10] uint32          	//叫买量
     	nAskAvPrice int32                 //加权平均叫卖价(上海L2)((a double number + 0.00005) *10000)
     	nBidAvPrice int32                 //加权平均叫买价(上海L2)((a double number + 0.00005) *10000)
   	iTotalAskVolume int64         	//叫卖总量(上海L2)
@@ -137,21 +138,33 @@ func array2str4int(arr [10]int32, len int) string {
 	var str string
 	for i:=0; i<len; i++ {
 		if i==len-1 {
-			str += string(arr[i]) + " "
+			str += strconv.Itoa(int(arr[i])) + " "
 		}else {
-			str += string(arr[i]) + ","
+			str += strconv.Itoa(int(arr[i])) + ","
 		}
 	}
 	return str
 }
 
-func array2str4uint(arr [10]uint, len int) string {
+func array2str4uint(arr [10]uint32, len int) string {
 	var str string
 	for i:=0; i<len; i++ {
 		if i==len-1 {
-			str += string(arr[i]) + " "
+			str += strconv.FormatUint(uint64(arr[i]), 10) + " "
 		}else {
-			str += string(arr[i]) + ","
+			str += strconv.FormatUint(uint64(arr[i]), 10) + ","
+		}
+	}
+	return str
+}
+
+func array2str4C(arr [50]C.int, len C.int) string {
+	var str string
+	for i:=0; i<int(len); i++ {
+		if i==int(len-1) {
+			str += strconv.Itoa(int(arr[i])) + " "
+		}else {
+			str += strconv.Itoa(int(arr[i])) + ","
 		}
 	}
 	return str
@@ -221,6 +234,7 @@ func GetKData(hTdb C.THANDLE, szCode string, szMarket string, nBeginDate int, nE
 			Char2byte(uintptr(unsafe.Pointer(&kL.chWindCode)),unsafe.Sizeof(kL.chWindCode[0]),len(kL.chWindCode)),//kL.chWindCode
 			Char2byte(uintptr(unsafe.Pointer(&kL.chCode)),unsafe.Sizeof(kL.chCode[0]),len(kL.chCode)),//kL.chCode
 			kL.nDate, kL.nTime, kL.nOpen, kL.nHigh, kL.nLow, kL.nClose, kL.iVolume, kL.iTurover, kL.nMatchItems, kL.nInterest )
+		fmt.Println("--------------------------------------")
 		tmpPtr += sizeOf*100
 		i += 100
 	}
@@ -342,7 +356,7 @@ func GetTickData(hTdb C.THANDLE, szCode string, szMarket string, nDate int)  {
 
 		fmt.Println("--------------------------------------")
 		i += 1000
-		tmpPtr += sizeOf-2
+		tmpPtr += (sizeOf-2)*1000
 	}
 }
 
@@ -444,9 +458,6 @@ func GetOrder(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int)  {
 
 }
 
-
-//tested
-/*
 func GetOrderQueue(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int) {
 	var req C.TDBDefine_ReqOrderQueue
 	String2char(szCode, uintptr(unsafe.Pointer(&req.chCode)), unsafe.Sizeof(req.chCode[0]))
@@ -463,7 +474,6 @@ func GetOrderQueue(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int)
 	fmt.Printf("收到 %d 条委托队列消息，打印 1/1000 条\n", pCount);
 	tmpPtr := uintptr(unsafe.Pointer(pOrderQueue))
 	sizeOf := unsafe.Sizeof(*pOrderQueue)
-
 	for i := 0; i < int(pCount); {
 		pOQ := (*C.TDBDefine_OrderQueue)(unsafe.Pointer(tmpPtr))
 		fmt.Printf("订单时间(Date): %d \n", pOQ.nDate)
@@ -479,10 +489,9 @@ func GetOrderQueue(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int)
 
 	}
 }
-*/
+
 
 //指标公式
-
 func UseEZFFormula(hTdb C.THANDLE) {
 	fmt.Println("-------------------UseEZFFormula-------------");
 	//公式的编写，请参考<<TRANSEND-TS-M0001 易编公式函数表V1(2).0-20110822.pdf>>

@@ -57,27 +57,11 @@ func main(){
 	pCode = C.TDB_GetCodeInfo(hTdb, C.CString("000001.SZ"), C.CString("SZ-2-0"))
 	fmt.Printf("交易所代码 chWindCode:%s \n", Char2byte(uintptr(unsafe.Pointer(&pCode.chCode)),unsafe.Sizeof(pCode.chCode[0]),len(pCode.chCode)))
 
-	/*var pCount C.int = 0
-	C.TDB_GetCodeTable(hTdb,C.CString("SZ"),&pCode,&pCount);
-	tmpPtr := uintptr(unsafe.Pointer(pCode))
-	sizeOf := unsafe.Sizeof(*pCode)
-	if pCount!=0 && pCode!=nil{
-		for i := 0; i < 2; i++{
-		pC := (*C.TDBDefine_Code)(unsafe.Pointer(tmpPtr))
-		fmt.Println("-------------code table ----------------------------");
-		fmt.Printf("交易所代码 chWindCode:%s \n", Char2byte(uintptr(unsafe.Pointer(&pC.chCode)),unsafe.Sizeof(pC.chCode),len(pC.chCode)))
-		fmt.Printf("市场代码 chWindCode:%s \n", Char2byte(uintptr(unsafe.Pointer(&pC.chMarket)),unsafe.Sizeof(pC.chMarket),len(pC.chMarket)))
-		fmt.Printf("证券中文名称 chWindCode:%s \n", Char2byte(uintptr(unsafe.Pointer(&pC.chCNName)),unsafe.Sizeof(pC.chCNName),len(pC.chCNName)))
-		fmt.Printf("证券英文名称 chWindCode:%s \n", Char2byte(uintptr(unsafe.Pointer(&pC.chENName)),unsafe.Sizeof(pC.chENName),len(pC.chENName)))
-		fmt.Printf("证券类型 chWindCode:%d \n", pC.nType)
-		tmpPtr += sizeOf
-		}
 
-	}*/
-	//GetKData(hTdb, "600715.SH", "SH-2-0", 20151126, 20151126, C.CYC_MINUTE, 0, 0, 1);	//autocomplete k-minute
-	GetTickData(hTdb, "000001.sz", "SZ-2-0", 20150910);					//tick
-	//GetTransaction(hTdb, "000001.sz", "SZ-2-0", 20150910);					//Transaction
-	//GetOrder(hTdb, "000001.sz", "SZ-2-0", 20150910);					//Order
-	//GetOrderQueue(hTdb, "000001.sz", "SZ-2-0", 20150910);					//OrderQueue
-	//UseEZFFormula(hTdb);									//test for formula
+	GetKData(hTdb, "600715.SH", "SH-2-0", 20151126, 20151126, C.CYC_MINUTE, 0, 0, 1);	//autocomplete k-minute
+	GetTickData(hTdb, "000001.SZ", "SZ-2-0", 20161122);//带买卖盘的tick					//tick
+	GetTransaction(hTdb, "000001.sz", "SZ-2-0", 20150910);					//Transaction
+	GetOrder(hTdb, "000001.sz", "SZ-2-0", 20150910);					//Order
+	GetOrderQueue(hTdb, "000001.sz", "SZ-2-0", 20150910);					//OrderQueue
+	UseEZFFormula(hTdb);									//test for formula
 }
