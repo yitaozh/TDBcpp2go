@@ -10,14 +10,23 @@ package main
 import "C"
 import (
 	"fmt"
-	"time"
 	"unsafe"
+	"time"
 	"strconv"
+	"log"
 	//"io"
 	"os"
 	"bytes"
 	"encoding/binary"
+	"github.com/influxdata/influxdb/client/v2"
+	"math/rand"
 	//"code.google.com/p/mahonia"
+)
+
+const (
+	MyDB = "square_holes"
+	username = "bubba"
+	password = "bumblebeetuna"
 )
 
 type Define_Tick struct{
@@ -412,7 +421,7 @@ func GetTransaction(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int
 }
 
 //tested good
-func GetOrder(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int)  {
+func GetOrder(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int, clnt client.Client)  {
 	var req C.TDBDefine_ReqOrder
 	String2char(szCode,uintptr(unsafe.Pointer(&req.chCode)),unsafe.Sizeof(req.chCode[0]))
 	String2char(szMarketKey,uintptr(unsafe.Pointer(&req.chMarketKey)),unsafe.Sizeof(req.chMarketKey[0]))
@@ -428,6 +437,26 @@ func GetOrder(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int)  {
 	fmt.Println("-------------------------Transaction Data--------------------------")
 	fmt.Printf("收到 %d 条逐笔委托消息，打印 1/10000 条\n", pCount)
 
+	_, err := queryDB(clnt, fmt.Sprintf("DROP DATABASE %s", "systemstats"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = queryDB(clnt, fmt.Sprintf("CREATE DATABASE %s", "systemstats"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	bp, err := client.NewBatchPoints(client.BatchPointsConfig{
+		Database:  "systemstats",
+		Precision: "us",
+	})
+	_, err = queryDB(clnt, fmt.Sprintf("CREATE DATABASE %s", "systemstats"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	rand.Seed(time.Now().UnixNano())
 	tmpPtr := uintptr(unsafe.Pointer(pOrder))
 	sizeOf := unsafe.Sizeof(*pOrder)
 	for i:=0; i<int(pCount); {
@@ -454,8 +483,33 @@ func GetOrder(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int)  {
 		//fmt.Println(order)
 		i += 10000
 		tmpPtr += (sizeOf-2)*10000
+		tags := map[string]string{
+			"Kind": string(order.chOrderKind),
+			"Code": string(order.chFunctionCode),
+		}
+		fields := map[string]interface{}{
+			"data": order.nDate,
+			"time": order.nTime,
+			"number": order.nOrder,
+			"Kind": order.chOrderKind,
+			"Code": order.chFunctionCode,
+			"Price": order.nOrderPrice,
+			"Volume": order.nOrderVolume,
+		}
+		pt, err := client.NewPoint(
+			"TDBOrder",
+			tags,
+			fields,
+			time.Now(),
+		)
+		if err != nil {
+			log.Fatal(err)
+		}
+		bp.AddPoint(pt)
 	}
-
+	if err := clnt.Write(bp); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func GetOrderQueue(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int) {
@@ -612,5 +666,73 @@ func UseEZFFormula(hTdb C.THANDLE) {
 	fmt.Printf("Error:%d\n", int(nErr))
 
 	C.TDB_ReleaseCalcFormula(pResult)
+}
+
+func queryDB(clnt client.Client, cmd string) (res []client.Result, err error) {
+	q := client.Query{
+		Command:  cmd,
+		Database: MyDB,
+	}
+	if response, err := clnt.Query(q); err == nil {
+		if response.Error() != nil {
+			return res, response.Error()
+		}
+		res = response.Results
+	} else {
+		return res, err
+	}
+	return res, nil
+}
+
+func writePoints(clnt client.Client) {
+	sampleSize := 10
+	_, err := queryDB(clnt, fmt.Sprintf("DROP DATABASE %s", "systemstats"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = queryDB(clnt, fmt.Sprintf("CREATE DATABASE %s", "systemstats"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	bp, err := client.NewBatchPoints(client.BatchPointsConfig{
+		Database:  "systemstats",
+		Precision: "us",
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	rand.Seed(time.Now().UnixNano())
+	for i := 0; i < sampleSize; i++ {
+		regions := []string{"us-west1", "us-west2", "us-west3", "us-east1"}
+		tags := map[string]string{
+			"cpu":    "cpu-total",
+			"host":   fmt.Sprintf("host%d", rand.Intn(1000)),
+			"region": regions[rand.Intn(len(regions))],
+		}
+
+		idle := rand.Float64() * 100.0
+		fields := map[string]interface{}{
+			"idle": idle,
+			"busy": 100.0 - idle,
+		}
+
+		pt, err := client.NewPoint(
+			"cpu_usage",
+			tags,
+			fields,
+			time.Now(),
+		)
+		if err != nil {
+			log.Fatal(err)
+		}
+		bp.AddPoint(pt)
+	}
+
+	if err := clnt.Write(bp); err != nil {
+		log.Fatal(err)
+	}
 }
 
