@@ -68,11 +68,21 @@ func main(){
 		log.Fatal(err)
 	}
 
-	//GetKData(hTdb, "600715.SH", "SH-2-0", 20151126, 20151126, C.CYC_MINUTE, 0, 0, 1);	//autocomplete k-minute
-	//GetTickData(hTdb, "000001.SZ", "SZ-2-0", 20161122);//带买卖盘的tick					//tick
-	//GetTransaction(hTdb, "000001.sz", "SZ-2-0", 20150910);					//Transaction
+	_, err = queryDB(c, fmt.Sprintf("DROP DATABASE %s", "TDB"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = queryDB(c, fmt.Sprintf("CREATE DATABASE %s", "TDB"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	//GetKData(hTdb, "600715.SH", "SH-2-0", 20151126, 20151126, C.CYC_MINUTE, 0, 0, 1,c);	//autocomplete k-minute
+	GetTickData(hTdb, "000001.SZ", "SZ-2-0", 20161122,c);//带买卖盘的tick					//tick
+	GetTransaction(hTdb, "000001.sz", "SZ-2-0", 20150910, c);					//Transaction
 	GetOrder(hTdb, "000001.sz", "SZ-2-0", 20150910, c);					//Order
-	//GetOrderQueue(hTdb, "000001.sz", "SZ-2-0", 20150910);					//OrderQueue
+	//GetOrderQueue(hTdb, "000001.sz", "SZ-2-0", 20150910,c);					//OrderQueue
 	//UseEZFFormula(hTdb);									//test for formula
 
 

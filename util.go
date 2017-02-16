@@ -106,6 +106,12 @@ type Define_Order struct{
 	nOrderVolume int32         //委托数量
 }
 
+func combineNums(nDate int32, nTime int32) string {
+	var str string
+	str = strconv.Itoa(int(nDate)) + strconv.Itoa(int(nTime))
+	return str
+}
+
 func check(e error)  {
 	if e!=nil{
 		panic(e)
@@ -214,7 +220,7 @@ func GetCodeTable(hTdb C.THANDLE, szMarket string)  {
 }
 
 //tested good
-func GetKData(hTdb C.THANDLE, szCode string, szMarket string, nBeginDate int, nEndDate int, nCycle int, nUserDef int, nCQFlag int, nAutoComplete int) {
+func GetKData(hTdb C.THANDLE, szCode string, szMarket string, nBeginDate int, nEndDate int, nCycle int, nUserDef int, nCQFlag int, nAutoComplete int, clnt client.Client) {
 	var req *C.TDBDefine_ReqKLine = new(C.TDBDefine_ReqKLine)
 	String2char(szCode,uintptr(unsafe.Pointer(&req.chCode)),unsafe.Sizeof(req.chCode[0]))
 	String2char(szMarket,uintptr(unsafe.Pointer(&req.chMarketKey)),unsafe.Sizeof(req.chMarketKey[0]))
@@ -239,9 +245,11 @@ func GetKData(hTdb C.THANDLE, szCode string, szMarket string, nBeginDate int, nE
 	sizeOf := unsafe.Sizeof(*kLine)
 	for i:=0; i<int(pCount);  {
 		kL := (*C.TDBDefine_KLine)(unsafe.Pointer(tmpPtr))
+		windCode := Char2byte(uintptr(unsafe.Pointer(&kL.chWindCode)),unsafe.Sizeof(kL.chWindCode[0]),len(kL.chWindCode))
+		code := Char2byte(uintptr(unsafe.Pointer(&kL.chCode)),unsafe.Sizeof(kL.chCode[0]),len(kL.chCode))
 		fmt.Printf("WindCode:%s\n Code:%s\n Date:%d\n Time:%d\n Open:%d\n High:%d\n Low:%d\n Close:%v\n Volume:%v\n Turover:%d\n MatchItem:%d\n Interest:%d\n",
-			Char2byte(uintptr(unsafe.Pointer(&kL.chWindCode)),unsafe.Sizeof(kL.chWindCode[0]),len(kL.chWindCode)),//kL.chWindCode
-			Char2byte(uintptr(unsafe.Pointer(&kL.chCode)),unsafe.Sizeof(kL.chCode[0]),len(kL.chCode)),//kL.chCode
+			windCode,//kL.chWindCode
+			code,//kL.chCode
 			kL.nDate, kL.nTime, kL.nOpen, kL.nHigh, kL.nLow, kL.nClose, kL.iVolume, kL.iTurover, kL.nMatchItems, kL.nInterest )
 		fmt.Println("--------------------------------------")
 		tmpPtr += sizeOf*100
@@ -251,7 +259,7 @@ func GetKData(hTdb C.THANDLE, szCode string, szMarket string, nBeginDate int, nE
 
 //tested good
 
-func GetTickData(hTdb C.THANDLE, szCode string, szMarket string, nDate int)  {
+func GetTickData(hTdb C.THANDLE, szCode string, szMarket string, nDate int, clnt client.Client)  {
 	var req C.TDBDefine_ReqTick
 	String2char(szCode,uintptr(unsafe.Pointer(&req.chCode)),unsafe.Sizeof(req.chCode[0]))
 	String2char(szMarket,uintptr(unsafe.Pointer(&req.chMarketKey)),unsafe.Sizeof(req.chMarketKey[0]))
@@ -267,6 +275,11 @@ func GetTickData(hTdb C.THANDLE, szCode string, szMarket string, nDate int)  {
 	var tick Define_Tick
 	fmt.Println("------------------------Tick Data---------------------------")
 	fmt.Printf("共收到 %d 条Tick数据， 打印 1/100 条：\n", pCount)
+
+	bp, _ := client.NewBatchPoints(client.BatchPointsConfig{
+		Database:  "TDB",
+		Precision: "us",
+	})
 
 	tmpPtr := uintptr(unsafe.Pointer(pTick))
 	sizeOf := unsafe.Sizeof(*pTick)
@@ -366,12 +379,60 @@ func GetTickData(hTdb C.THANDLE, szCode string, szMarket string, nDate int)  {
 		fmt.Println("--------------------------------------")
 		i += 1000
 		tmpPtr += (sizeOf-2)*1000
+
+		tags := map[string]string{
+			"Code": string(tick.chCode[:]),
+		}
+		fields := map[string]interface{}{
+			"Time": combineNums(tick.nDate, tick.nTime),
+			"Price": tick.nPrice,
+			"Volume": tick.iVolume,
+			"Turover": tick.iTurover,
+			"MatchItems": tick.nMatchItems,
+			"Interest": tick.nInterest,
+			"TradeFlag": tick.chTradeFlag,
+			"BSFlag": tick.chBSFlag,
+			"AccVolume": tick.iAccVolume,
+			"AccTurover": tick.iAccTurover,
+			"High": tick.nHigh,
+			"Low": tick.nLow,
+			"Open": tick.nOpen,
+			"PreClose": tick.nPreClose,
+			//期货字段
+//			"Settle": tick.nSettle,
+//			"Position": tick.nPosition,
+//			"CurDelta": tick.nCurDelta,
+//			"PreSettle": tick.nPreSettle,
+//			"PrePosition": tick.nPrePosition,
+			"AskPrice": array2str4int(tick.nAskPrice, 10),
+			"AskVolume": array2str4uint(tick.nAskVolume, 10),
+			"BidPrice": array2str4int(tick.nBidPrice, 10),
+			"BidVolume": array2str4uint(tick.nBidVolume, 10),
+			"AskAvPrice": tick.nAskAvPrice,
+			"BidAvPrice": tick.nBidAvPrice,
+			"TotalAskVolume": tick.iTotalAskVolume,
+			"TotalBidVolume": tick.iTotalBidVolume,
+
+		}
+		pt, err := client.NewPoint(
+			"TDBTransaction",
+			tags,
+			fields,
+			time.Now(),
+		)
+		if err != nil {
+			log.Fatal(err)
+		}
+		bp.AddPoint(pt)
+	}
+	if err := clnt.Write(bp); err != nil {
+		log.Fatal(err)
 	}
 }
 
 
 //tested good
-func GetTransaction(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int)  {
+func GetTransaction(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int, clnt client.Client)  {
 	var req C.TDBDefine_ReqTransaction
 	String2char(szCode,uintptr(unsafe.Pointer(&req.chCode)),unsafe.Sizeof(req.chCode[0]))
 	String2char(szMarketKey,uintptr(unsafe.Pointer(&req.chMarketKey)),unsafe.Sizeof(req.chMarketKey[0]))
@@ -386,6 +447,12 @@ func GetTransaction(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int
 	var transaction Define_Transaction
 	fmt.Println("-----------------------Transaction Data----------------------------")
 	fmt.Printf("收到 %d 条逐笔成交消息，打印 1/10000 条\n", pCount)
+
+	bp, _ := client.NewBatchPoints(client.BatchPointsConfig{
+		Database:  "TDB",
+		Precision: "us",
+	})
+
 	tmpPtr := uintptr(unsafe.Pointer(pTransaction))
 	sizeOf := unsafe.Sizeof(*pTransaction)
 	for i:=0; i<int(pCount); {
@@ -416,6 +483,34 @@ func GetTransaction(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int
 		//fmt.Printf("成交编号: %d \n", pT.nBidOrder)
 		i += 10000
 		tmpPtr += (sizeOf-1)*10000
+
+		tags := map[string]string{
+			"Code": string(transaction.chCode[:]),
+		}
+		fields := map[string]interface{}{
+			"Time": combineNums(transaction.nDate, transaction.nTime),
+			"Index": transaction.nIndex,
+			"FunctionCode": transaction.chFunctionCode,
+			"OrderKind": transaction.chOrderKind,
+			"BSFlag": transaction.chBSFlag,
+			"TradePrice": transaction.nTradePrice,
+			"TradeVolume": transaction.nTradeVolume,
+			"AskOrder": transaction.nAskOrder,
+			"BidOrder": transaction.nBidOrder,
+		}
+		pt, err := client.NewPoint(
+			"TDBTransaction",
+			tags,
+			fields,
+			time.Now(),
+		)
+		if err != nil {
+			log.Fatal(err)
+		}
+		bp.AddPoint(pt)
+	}
+	if err := clnt.Write(bp); err != nil {
+		log.Fatal(err)
 	}
 
 }
@@ -434,29 +529,14 @@ func GetOrder(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int, clnt
 	C.TDB_GetOrder(hTdb,&req, &pOrder, &pCount)
 
 	var order Define_Order
-	fmt.Println("-------------------------Transaction Data--------------------------")
+	fmt.Println("-------------------------Order Data--------------------------")
 	fmt.Printf("收到 %d 条逐笔委托消息，打印 1/10000 条\n", pCount)
 
-	_, err := queryDB(clnt, fmt.Sprintf("DROP DATABASE %s", "systemstats"))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	_, err = queryDB(clnt, fmt.Sprintf("CREATE DATABASE %s", "systemstats"))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	bp, err := client.NewBatchPoints(client.BatchPointsConfig{
-		Database:  "systemstats",
+	bp, _ := client.NewBatchPoints(client.BatchPointsConfig{
+		Database:  "TDB",
 		Precision: "us",
 	})
-	_, err = queryDB(clnt, fmt.Sprintf("CREATE DATABASE %s", "systemstats"))
-	if err != nil {
-		log.Fatal(err)
-	}
 
-	rand.Seed(time.Now().UnixNano())
 	tmpPtr := uintptr(unsafe.Pointer(pOrder))
 	sizeOf := unsafe.Sizeof(*pOrder)
 	for i:=0; i<int(pCount); {
@@ -474,27 +554,27 @@ func GetOrder(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int, clnt
 		binary.Read(bytes.NewBuffer(buf[86:90]), binary.LittleEndian, &order.nOrderVolume)
 		fmt.Printf("订单时间(Date): %d \n", order.nDate)
 		fmt.Printf("委托时间(HHMMSSmmm): %d \n", order.nTime)
-		fmt.Printf("委托编号: %d \n", order.nOrder)
-		fmt.Printf("委托类别: %c \n", order.chOrderKind)
-		fmt.Printf("委托代码: %c \n", order.chFunctionCode)
-		fmt.Printf("委托价格: %d \n", order.nOrderPrice)
-		fmt.Printf("委托数量: %d \n", order.nOrderVolume)
+		fmt.Printf("委托编号Order: %d \n", order.nOrder)
+		fmt.Printf("委托类别OrderKind: %c \n", order.chOrderKind)
+		fmt.Printf("委托代码FunctionCode: %c \n", order.chFunctionCode)
+		fmt.Printf("委托价格OrderPrice: %d \n", order.nOrderPrice)
+		fmt.Printf("委托数量OrderVolume: %d \n", order.nOrderVolume)
 		fmt.Println("---------------------------------------------")
 		//fmt.Println(order)
 		i += 10000
 		tmpPtr += (sizeOf-2)*10000
+
 		tags := map[string]string{
-			"Kind": string(order.chOrderKind),
-			"Code": string(order.chFunctionCode),
+			"Code": string(order.chCode[:]),
 		}
 		fields := map[string]interface{}{
-			"data": order.nDate,
-			"time": order.nTime,
-			"number": order.nOrder,
-			"Kind": order.chOrderKind,
-			"Code": order.chFunctionCode,
-			"Price": order.nOrderPrice,
-			"Volume": order.nOrderVolume,
+			"Time": combineNums(order.nDate, order.nTime),
+			"Index": order.nIndex,
+			"Order": order.nOrder,
+			"OrderKind": order.chOrderKind,
+			"FunctionCode": order.chFunctionCode,
+			"OrderPrice": order.nOrderPrice,
+			"OrderVolume": order.nOrderVolume,
 		}
 		pt, err := client.NewPoint(
 			"TDBOrder",
@@ -512,7 +592,7 @@ func GetOrder(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int, clnt
 	}
 }
 
-func GetOrderQueue(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int) {
+func GetOrderQueue(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int, clnt client.Client) {
 	var req C.TDBDefine_ReqOrderQueue
 	String2char(szCode, uintptr(unsafe.Pointer(&req.chCode)), unsafe.Sizeof(req.chCode[0]))
 	String2char(szMarketKey, uintptr(unsafe.Pointer(&req.chMarketKey)), unsafe.Sizeof(req.chMarketKey[0]))
@@ -526,6 +606,8 @@ func GetOrderQueue(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int)
 
 	fmt.Println("-------------------OrderQueue Data-------------");
 	fmt.Printf("收到 %d 条委托队列消息，打印 1/1000 条\n", pCount);
+
+
 	tmpPtr := uintptr(unsafe.Pointer(pOrderQueue))
 	sizeOf := unsafe.Sizeof(*pOrderQueue)
 	for i := 0; i < int(pCount); {
@@ -540,6 +622,7 @@ func GetOrderQueue(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int)
 		fmt.Println("---------------------------------------------")
 		i += 10000
 		tmpPtr += sizeOf * 10000
+
 
 	}
 }
