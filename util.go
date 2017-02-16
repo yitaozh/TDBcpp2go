@@ -14,13 +14,10 @@ import (
 	"time"
 	"strconv"
 	"log"
-	//"io"
 	"os"
 	"bytes"
 	"encoding/binary"
 	"github.com/influxdata/influxdb/client/v2"
-	"math/rand"
-	//"code.google.com/p/mahonia"
 )
 
 const (
@@ -242,6 +239,12 @@ func GetKData(hTdb C.THANDLE, szCode string, szMarket string, nBeginDate int, nE
 	fmt.Println("---------------------------K Data--------------------")
 	fmt.Printf("数据条数：%d,打印 1/100 条\n\n",pCount)
 	tmpPtr := uintptr(unsafe.Pointer(kLine))
+
+	bp, _ := client.NewBatchPoints(client.BatchPointsConfig{
+		Database:  "TDB",
+		Precision: "us",
+	})
+
 	sizeOf := unsafe.Sizeof(*kLine)
 	for i:=0; i<int(pCount);  {
 		kL := (*C.TDBDefine_KLine)(unsafe.Pointer(tmpPtr))
@@ -254,6 +257,34 @@ func GetKData(hTdb C.THANDLE, szCode string, szMarket string, nBeginDate int, nE
 		fmt.Println("--------------------------------------")
 		tmpPtr += sizeOf*100
 		i += 100
+
+		tags := map[string]string{
+			"Code": string(code[:]),
+		}
+		fields := map[string]interface{}{
+			"Time": combineNums(int32(kL.nDate), int32(kL.nTime)),
+			"Open": kL.nOpen,
+			"High": kL.nHigh,
+			"Low": kL.nLow,
+			"Close": kL.nClose,
+			"Volume": kL.iVolume,
+			"Turover": kL.iTurover,
+			"MatchItems": kL.nMatchItems,
+			"Interest": kL.nInterest,
+		}
+		pt, err := client.NewPoint(
+			"TDBKData",
+			tags,
+			fields,
+			time.Now(),
+		)
+		if err != nil {
+			log.Fatal(err)
+		}
+		bp.AddPoint(pt)
+	}
+	if err := clnt.Write(bp); err != nil {
+		log.Fatal(err)
 	}
 }
 
@@ -415,7 +446,7 @@ func GetTickData(hTdb C.THANDLE, szCode string, szMarket string, nDate int, clnt
 
 		}
 		pt, err := client.NewPoint(
-			"TDBTransaction",
+			"TDBTick",
 			tags,
 			fields,
 			time.Now(),
@@ -607,11 +638,16 @@ func GetOrderQueue(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int,
 	fmt.Println("-------------------OrderQueue Data-------------");
 	fmt.Printf("收到 %d 条委托队列消息，打印 1/1000 条\n", pCount);
 
+	bp, _ := client.NewBatchPoints(client.BatchPointsConfig{
+		Database:  "TDB",
+		Precision: "us",
+	})
 
 	tmpPtr := uintptr(unsafe.Pointer(pOrderQueue))
 	sizeOf := unsafe.Sizeof(*pOrderQueue)
 	for i := 0; i < int(pCount); {
 		pOQ := (*C.TDBDefine_OrderQueue)(unsafe.Pointer(tmpPtr))
+		code := Char2byte(uintptr(unsafe.Pointer(&pOQ.chCode)),unsafe.Sizeof(pOQ.chCode[0]),len(pOQ.chCode))
 		fmt.Printf("订单时间(Date): %d \n", pOQ.nDate)
 		fmt.Printf("订单时间(HHMMSS): %d \n", pOQ.nTime)
 		fmt.Printf("买卖方向('B':Bid 'A':Ask): %c \n", pOQ.nSide)
@@ -623,7 +659,30 @@ func GetOrderQueue(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int,
 		i += 10000
 		tmpPtr += sizeOf * 10000
 
-
+		tags := map[string]string{
+			"Code": string(code[:]),
+		}
+		fields := map[string]interface{}{
+			"Time": combineNums(int32(pOQ.nDate), int32(pOQ.nTime)),
+			"Side": pOQ.nSide,
+			"Price": pOQ.nPrice,
+			"OrderItems": pOQ.nOrderItems,
+			"ABItems": pOQ.nABItems,
+			"ABVolume": array2str4C(pOQ.nABVolume, pOQ.nABItems),
+		}
+		pt, err := client.NewPoint(
+			"TDBOrderQueue",
+			tags,
+			fields,
+			time.Now(),
+		)
+		if err != nil {
+			log.Fatal(err)
+		}
+		bp.AddPoint(pt)
+	}
+	if err := clnt.Write(bp); err != nil {
+		log.Fatal(err)
 	}
 }
 
@@ -638,37 +697,12 @@ func UseEZFFormula(hTdb C.THANDLE) {
 	//添加公式到服务器并编译，若不过，会有错误返回
 	var addRes *C.TDBDefine_AddFormulaRes = new(C.TDBDefine_AddFormulaRes)
 	nErr := C.TDB_AddFormula(hTdb, C.CString(strName), C.CString(strContent),addRes)
-	/*chInfo := Char2byte(uintptr(unsafe.Pointer(&addRes.chInfo)),unsafe.Sizeof(addRes.chInfo[0]),len(addRes.chInfo))
-	fmt.Printf("Add Formula Result:%s\n",chInfo)
-
-	string_chInfo := string(chInfo)
-	enc := mahonia.NewEncoder("UTF-8")
-	strr := enc.ConvertString(string_chInfo)
-	fmt.Println(strr)*/
 	fmt.Printf("Add Formula Result:%s\n",Char2byte(uintptr(unsafe.Pointer(&addRes.chInfo)),unsafe.Sizeof(addRes.chInfo[0]),len(addRes.chInfo)))
-//======================================================================================================
-/*	var filename string = "./output1.txt"
-	var f *os.File
-	var err1 error
-	if checkFilesExist(filename){
-		f, err1 = os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
-		fmt.Println("file exist")
-	}else{
-		f, err1 = os.Create(filename)
-		fmt.Println("file not exist")
-	}
-	check(err1)
-	bytes := Char2byte(uintptr(unsafe.Pointer(&addRes.chInfo)),unsafe.Sizeof(addRes.chInfo[0]),len(addRes.chInfo))
-	str:= string(bytes[:])
-	n, err1 := io.WriteString(f, str)
-	check(err1)
-	fmt.Printf("write %d bit\n", n)*//*
-*/
-//======================================================================================================
+
 	//查询服务器上的公式，能看到我们刚才上传的"KDJ"
 	var pEZFItem *C.TDBDefine_FormulaItem = nil
 	var nItems C.int = 0
-	//名字为空表示查�HB�j�RX 询服务器上所有的公式
+	//名字为空表示查询服务器上所有的公式
 	nErr = C.TDB_GetFormula(hTdb, nil, &pEZFItem, &nItems)
 	tmpPtr := uintptr(unsafe.Pointer(pEZFItem))
 	sizeOf := unsafe.Sizeof(*pEZFItem)
@@ -765,57 +799,5 @@ func queryDB(clnt client.Client, cmd string) (res []client.Result, err error) {
 		return res, err
 	}
 	return res, nil
-}
-
-func writePoints(clnt client.Client) {
-	sampleSize := 10
-	_, err := queryDB(clnt, fmt.Sprintf("DROP DATABASE %s", "systemstats"))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	_, err = queryDB(clnt, fmt.Sprintf("CREATE DATABASE %s", "systemstats"))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	bp, err := client.NewBatchPoints(client.BatchPointsConfig{
-		Database:  "systemstats",
-		Precision: "us",
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	rand.Seed(time.Now().UnixNano())
-	for i := 0; i < sampleSize; i++ {
-		regions := []string{"us-west1", "us-west2", "us-west3", "us-east1"}
-		tags := map[string]string{
-			"cpu":    "cpu-total",
-			"host":   fmt.Sprintf("host%d", rand.Intn(1000)),
-			"region": regions[rand.Intn(len(regions))],
-		}
-
-		idle := rand.Float64() * 100.0
-		fields := map[string]interface{}{
-			"idle": idle,
-			"busy": 100.0 - idle,
-		}
-
-		pt, err := client.NewPoint(
-			"cpu_usage",
-			tags,
-			fields,
-			time.Now(),
-		)
-		if err != nil {
-			log.Fatal(err)
-		}
-		bp.AddPoint(pt)
-	}
-
-	if err := clnt.Write(bp); err != nil {
-		log.Fatal(err)
-	}
 }
 
