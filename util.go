@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"github.com/influxdata/influxdb/client/v2"
+	"io"
 )
 
 const (
@@ -115,7 +116,7 @@ func check(e error)  {
 	}
 }
 
-func checkFilesExist(filename string)(bool){
+func checkFileIsExist(filename string)(bool){
 	var exist = true
 	if _,err := os.Stat(filename); os.IsNotExist(err){
 		exist = false
@@ -183,6 +184,16 @@ func array2str4C(arr [50]C.int, len C.int) string {
 }
 
 //请求代码表
+
+func length(arr [256]byte) int{
+	var i int
+	for i=0; i<256; i++{
+		if arr[i]==0{
+			return i
+		}
+	}
+	return i
+}
 func GetCodeTable(hTdb C.THANDLE, szMarket string)  {
 	var (
 		pCodetable *C.TDBDefine_Code = nil
@@ -194,29 +205,58 @@ func GetCodeTable(hTdb C.THANDLE, szMarket string)  {
 		fmt.Println("无代码表！")
 		return
 	}
+	var f    *os.File
+	var filename = "./output1.txt";
+	var err1   error;
+	os.Remove(filename)
+	if checkFileIsExist(filename) {  //如果文件存在
+		f, err1 = os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, os.ModeAppend)  //打开文件
+		fmt.Println("文件存在");
+	}else {
+		f, err1 = os.Create(filename)  //创建文件
+		fmt.Println("文件不存在");
+	}
+	check(err1)
 
 	fmt.Println("---------------------------Code Table--------------------")
-	fmt.Printf("收到代码表项数：%d，\n\n",pCount)
+	fmt.Printf("收到代码表项数：%d，\n\n",int64(pCount))
 	//输出
 	tmpPtr := uintptr(unsafe.Pointer(pCodetable))
 	sizeOf := unsafe.Sizeof(*pCodetable)
 	if outPutTable {
-		for i:=0; i<int(pCount); i++ {
+		for i:=0; i<int(pCount);i+=100 {
 			pCt := (*C.TDBDefine_Code)(unsafe.Pointer(tmpPtr))
-			fmt.Printf("万得代码 chWindCode:%s \n", Char2byte(uintptr(unsafe.Pointer(&pCt.chWindCode)),unsafe.Sizeof(pCt.chWindCode[0]),len(pCt.chWindCode)))
-			fmt.Printf("交易所代码 chWindCode:%s \n", Char2byte(uintptr(unsafe.Pointer(&pCt.chCode)),unsafe.Sizeof(pCt.chCode[0]),len(pCt.chCode)))
-			fmt.Printf("市场代码 chMarket:%s \n", Char2byte(uintptr(unsafe.Pointer(&pCt.chMarket)),unsafe.Sizeof(pCt.chMarket[0]),len(pCt.chMarket)))
-			fmt.Printf("证券中文名称 chCNName:%s \n", Char2byte(uintptr(unsafe.Pointer(&pCt.chCNName)),unsafe.Sizeof(pCt.chCNName[0]),len(pCt.chCNName)))
-			fmt.Printf("证券英文名称 chENName:%s \n", Char2byte(uintptr(unsafe.Pointer(&pCt.chENName)),unsafe.Sizeof(pCt.chENName[0]),len(pCt.chENName)))
+			//code
+			code := Char2byte(uintptr(unsafe.Pointer(&pCt.chWindCode)),unsafe.Sizeof(pCt.chWindCode[0]),len(pCt.chWindCode))
+			fmt.Printf("万得代码 chWindCode:%s \n", code)
+			//chWindCode
+			chWindCode := Char2byte(uintptr(unsafe.Pointer(&pCt.chCode)),unsafe.Sizeof(pCt.chCode[0]),len(pCt.chCode))
+			fmt.Printf("交易所代码 chWindCode:%s \n", chWindCode)
+			_, err1 := io.WriteString(f, string(code[:length(chWindCode)])+"\t")
+			//chMarket
+			chMarket := Char2byte(uintptr(unsafe.Pointer(&pCt.chMarket)),unsafe.Sizeof(pCt.chMarket[0]),len(pCt.chMarket))
+			fmt.Printf("市场代码 chMarket:%s \n", chMarket)
+			//chName
+			chName := Char2byte(uintptr(unsafe.Pointer(&pCt.chCNName)),unsafe.Sizeof(pCt.chCNName[0]),len(pCt.chCNName))
+			fmt.Printf("证券中文名称 chCNName:%s \n", chName)
+			_, err1 = io.WriteString(f,string(chName[:length(chName)])+"\t")
+			check(err1)
+			//chENName
+			chENName := Char2byte(uintptr(unsafe.Pointer(&pCt.chENName)),unsafe.Sizeof(pCt.chENName[0]),len(pCt.chENName))
+			fmt.Printf("证券英文名称 chENName:%s \n", chENName)
+
 			fmt.Printf("证券类型 nType:%d \n", pCt.nType)
+			_, err1 = io.WriteString(f,strconv.Itoa((int(int32(pCt.nType))))+"\t")
+			check(err1)
 			fmt.Println("----------------------------------------")
-			tmpPtr += sizeOf
+			tmpPtr += sizeOf * 100
+			io.WriteString(f,"\n")
 		}
 	}
 
 }
 
-//tested good
+//tested goodpT := (*C.TDBDefine_Tick)(unsafe.Pointer(tmpPtr))
 func GetKData(hTdb C.THANDLE, szCode string, szMarket string, nBeginDate int, nEndDate int, nCycle int, nUserDef int, nCQFlag int, nAutoComplete int, clnt client.Client) {
 	var req *C.TDBDefine_ReqKLine = new(C.TDBDefine_ReqKLine)
 	String2char(szCode,uintptr(unsafe.Pointer(&req.chCode)),unsafe.Sizeof(req.chCode[0]))

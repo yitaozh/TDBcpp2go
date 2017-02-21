@@ -78,12 +78,13 @@ func main(){
 		log.Fatal(err)
 	}
 
-	GetKData(hTdb, "600715.SH", "SH-2-0", 20151126, 20151126, C.CYC_MINUTE, 0, 0, 1,c);	//autocomplete k-minute
-	GetTickData(hTdb, "000001.SZ", "SZ-2-0", 20161122,c);//带买卖盘的tick					//tick
-	GetTransaction(hTdb, "000001.sz", "SZ-2-0", 20150910, c);					//Transaction
-	GetOrder(hTdb, "000001.sz", "SZ-2-0", 20150910, c);					//Order
-	GetOrderQueue(hTdb, "000001.sz", "SZ-2-0", 20150910,c);					//OrderQueue
-	//UseEZFFormula(hTdb);									//test for formula
 
+	//GetKData(hTdb, "600715.SH", "SH-2-0", 20151126, 20151126, C.CYC_MINUTE, 0, 0, 1,c);	//autocomplete k-minute
+	//GetTickData(hTdb, "000001.SZ", "SZ-2-0", 20161122,c);//带买卖盘的tick					//tick
+	//GetTransaction(hTdb, "000001.sz", "SZ-2-0", 20150910, c);					//Transaction
+	//GetOrder(hTdb, "000001.sz", "SZ-2-0", 20150910, c);					//Order
+	//GetOrderQueue(hTdb, "000001.sz", "SZ-2-0", 20150910,c);					//OrderQueue
+	//UseEZFFormula(hTdb);									//test for formula
+	GetCodeTable(hTdb, "SZ-2-0")
 
 }
