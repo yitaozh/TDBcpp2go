@@ -22,9 +22,9 @@ import (
 )
 
 const (
-	MyDB = "square_holes"
-	username = "bubba"
-	password = "bumblebeetuna"
+	MyDB = "wind_data"
+	username = "mingshi"
+	password = "mingshi888"
 )
 
 type Define_Tick struct{
@@ -182,7 +182,22 @@ func array2str4C(arr [50]C.int, len C.int) string {
 	}
 	return str
 }
-
+func timeGenerateor(nDate int, nTime int) time.Time {
+	strDate := strconv.Itoa(nDate)
+	strTime := strconv.Itoa(nTime)
+	if len(strTime) < 9 {
+		strTime = "0" + strTime
+	}
+	strYear := strDate[0:4]
+	strMonth := strDate[4:6]
+	strDay := strDate[6:8]
+	strHour := strTime[0:2]
+	strMin := strTime[2:4]
+	strSecond := strTime[4:6]
+	timeString := strYear + "-" + strMonth + "-" + strDay + " " + strHour + ":" + strMin + ":" + strSecond
+	newTime, _ := time.Parse("2006-01-02 15:04:05",timeString)
+	return newTime
+}
 //请求代码表
 
 func length(arr [256]byte) int{
@@ -295,14 +310,13 @@ func GetKData(hTdb C.THANDLE, szCode string, szMarket string, nBeginDate int, nE
 			code,//kL.chCode
 			kL.nDate, kL.nTime, kL.nOpen, kL.nHigh, kL.nLow, kL.nClose, kL.iVolume, kL.iTurover, kL.nMatchItems, kL.nInterest )
 		fmt.Println("--------------------------------------")
-		tmpPtr += sizeOf*100
-		i += 100
-
+		tmpPtr += sizeOf*1
+		i += 1
+		timeStamp := timeGenerateor(int(kL.nDate),int(kL.nTime))
 		tags := map[string]string{
 			"Code": string(code[:]),
 		}
 		fields := map[string]interface{}{
-			"Time": combineNums(int32(kL.nDate), int32(kL.nTime)),
 			"Open": kL.nOpen,
 			"High": kL.nHigh,
 			"Low": kL.nLow,
@@ -316,7 +330,7 @@ func GetKData(hTdb C.THANDLE, szCode string, szMarket string, nBeginDate int, nE
 			"TDBKData",
 			tags,
 			fields,
-			time.Now(),
+			timeStamp,
 		)
 		if err != nil {
 			log.Fatal(err)
@@ -448,20 +462,19 @@ func GetTickData(hTdb C.THANDLE, szCode string, szMarket string, nDate int, clnt
 
 
 		fmt.Println("--------------------------------------")
-		i += 1000
-		tmpPtr += (sizeOf-2)*1000
-
+		i += 100
+		tmpPtr += (sizeOf-2)*100
+		timeStamp := timeGenerateor(int(tick.nDate),int(tick.nTime))
 		tags := map[string]string{
 			"Code": string(tick.chCode[:]),
+			"TradeFlag": string(tick.chTradeFlag),
 		}
 		fields := map[string]interface{}{
-			"Time": combineNums(tick.nDate, tick.nTime),
 			"Price": tick.nPrice,
 			"Volume": tick.iVolume,
 			"Turover": tick.iTurover,
 			"MatchItems": tick.nMatchItems,
 			"Interest": tick.nInterest,
-			"TradeFlag": tick.chTradeFlag,
 			"BSFlag": tick.chBSFlag,
 			"AccVolume": tick.iAccVolume,
 			"AccTurover": tick.iAccTurover,
@@ -489,7 +502,7 @@ func GetTickData(hTdb C.THANDLE, szCode string, szMarket string, nDate int, clnt
 			"TDBTick",
 			tags,
 			fields,
-			time.Now(),
+			timeStamp,
 		)
 		if err != nil {
 			log.Fatal(err)
@@ -552,18 +565,17 @@ func GetTransaction(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int
 		fmt.Printf("叫买序号: %d \n", transaction.nBidOrder)
 		fmt.Println("---------------------------------------------")
 		//fmt.Printf("成交编号: %d \n", pT.nBidOrder)
-		i += 10000
-		tmpPtr += (sizeOf-1)*10000
-
+		i += 100
+		tmpPtr += (sizeOf-1)*100
+		timeStamp := timeGenerateor(int(transaction.nDate),int(transaction.nTime))
 		tags := map[string]string{
 			"Code": string(transaction.chCode[:]),
+			"OrderKind": string(transaction.chOrderKind),
+			"FunctionCode": string(transaction.chFunctionCode),
+			"BSFlag": string(transaction.chBSFlag),
 		}
 		fields := map[string]interface{}{
-			"Time": combineNums(transaction.nDate, transaction.nTime),
 			"Index": transaction.nIndex,
-			"FunctionCode": transaction.chFunctionCode,
-			"OrderKind": transaction.chOrderKind,
-			"BSFlag": transaction.chBSFlag,
 			"TradePrice": transaction.nTradePrice,
 			"TradeVolume": transaction.nTradeVolume,
 			"AskOrder": transaction.nAskOrder,
@@ -573,7 +585,7 @@ func GetTransaction(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int
 			"TDBTransaction",
 			tags,
 			fields,
-			time.Now(),
+			timeStamp,
 		)
 		if err != nil {
 			log.Fatal(err)
@@ -632,18 +644,17 @@ func GetOrder(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int, clnt
 		fmt.Printf("委托数量OrderVolume: %d \n", order.nOrderVolume)
 		fmt.Println("---------------------------------------------")
 		//fmt.Println(order)
-		i += 10000
-		tmpPtr += (sizeOf-2)*10000
-
+		i += 1
+		tmpPtr += (sizeOf-2)*1
+		timeStamp := timeGenerateor(int(order.nDate),int(order.nTime))
 		tags := map[string]string{
 			"Code": string(order.chCode[:]),
+			"FunctionCode": string(order.chFunctionCode),
 		}
 		fields := map[string]interface{}{
-			"Time": combineNums(order.nDate, order.nTime),
 			"Index": order.nIndex,
 			"Order": order.nOrder,
 			"OrderKind": order.chOrderKind,
-			"FunctionCode": order.chFunctionCode,
 			"OrderPrice": order.nOrderPrice,
 			"OrderVolume": order.nOrderVolume,
 		}
@@ -651,7 +662,7 @@ func GetOrder(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int, clnt
 			"TDBOrder",
 			tags,
 			fields,
-			time.Now(),
+			timeStamp,
 		)
 		if err != nil {
 			log.Fatal(err)
@@ -696,14 +707,13 @@ func GetOrderQueue(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int,
 		fmt.Printf("明细个数: %d \n", pOQ.nABItems)
 		fmt.Printf("订单明细: %s \n", array2str4C(pOQ.nABVolume, pOQ.nABItems))
 		fmt.Println("---------------------------------------------")
-		i += 10000
-		tmpPtr += sizeOf * 10000
-
+		i += 100
+		tmpPtr += sizeOf * 100
+		timeStamp := timeGenerateor(int(pOQ.nDate),int(pOQ.nTime))
 		tags := map[string]string{
 			"Code": string(code[:]),
 		}
 		fields := map[string]interface{}{
-			"Time": combineNums(int32(pOQ.nDate), int32(pOQ.nTime)),
 			"Side": pOQ.nSide,
 			"Price": pOQ.nPrice,
 			"OrderItems": pOQ.nOrderItems,
@@ -714,7 +724,7 @@ func GetOrderQueue(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int,
 			"TDBOrderQueue",
 			tags,
 			fields,
-			time.Now(),
+			timeStamp,
 		)
 		if err != nil {
 			log.Fatal(err)
