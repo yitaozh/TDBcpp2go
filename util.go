@@ -27,6 +27,12 @@ const (
 	password = "mingshi888"
 )
 
+type Code_Table struct {
+	chWindCode string
+	chCode string
+	codeType int32
+}
+
 type Define_Tick struct{
 	chWindCode [32]byte         	//万得代码(ag1312.SHF)
 	chCode [32]byte			//交易所代码(ag1312)
@@ -209,17 +215,17 @@ func length(arr [256]byte) int{
 	}
 	return i
 }
-func GetCodeTable(hTdb C.THANDLE, szMarket string)  {
+func GetCodeTable(hTdb C.THANDLE, szMarket string)([9000]Code_Table, int){
 	var (
 		pCodetable *C.TDBDefine_Code = nil
 		pCount C.int
 		outPutTable bool = true)
-	ret := C.TDB_GetCodeTable(hTdb, C.CString(szMarket), &pCodetable, &pCount)
+	_ = C.TDB_GetCodeTable(hTdb, C.CString(szMarket), &pCodetable, &pCount)
 
-	if ret == C.TDB_NO_DATA {
+	/*if ret == C.TDB_NO_DATA {
 		fmt.Println("无代码表！")
 		return
-	}
+	}*/
 	var f    *os.File
 	var filename = "./output1.txt";
 	var err1   error;
@@ -232,22 +238,25 @@ func GetCodeTable(hTdb C.THANDLE, szMarket string)  {
 		fmt.Println("文件不存在");
 	}
 	check(err1)
-
+	var Table [9000]Code_Table
 	fmt.Println("---------------------------Code Table--------------------")
 	fmt.Printf("收到代码表项数：%d，\n\n",int64(pCount))
 	//输出
 	tmpPtr := uintptr(unsafe.Pointer(pCodetable))
 	sizeOf := unsafe.Sizeof(*pCodetable)
 	if outPutTable {
-		for i:=0; i<int(pCount);i+=100 {
+		for i:=0; i<int(pCount);i+=1000 {
 			pCt := (*C.TDBDefine_Code)(unsafe.Pointer(tmpPtr))
 			//code
-			code := Char2byte(uintptr(unsafe.Pointer(&pCt.chWindCode)),unsafe.Sizeof(pCt.chWindCode[0]),len(pCt.chWindCode))
-			fmt.Printf("万得代码 chWindCode:%s \n", code)
+			chWindCode := Char2byte(uintptr(unsafe.Pointer(&pCt.chWindCode)),unsafe.Sizeof(pCt.chWindCode[0]),len(pCt.chWindCode))
+			fmt.Printf("万得代码 chWindCode:%s \n", chWindCode)
+			_, err1 := io.WriteString(f, string(chWindCode[:length(chWindCode)])+"\t")
+			Table[i].chWindCode = string(chWindCode[:length(chWindCode)])
 			//chWindCode
-			chWindCode := Char2byte(uintptr(unsafe.Pointer(&pCt.chCode)),unsafe.Sizeof(pCt.chCode[0]),len(pCt.chCode))
-			fmt.Printf("交易所代码 chWindCode:%s \n", chWindCode)
-			_, err1 := io.WriteString(f, string(code[:length(chWindCode)])+"\t")
+			chCode := Char2byte(uintptr(unsafe.Pointer(&pCt.chCode)),unsafe.Sizeof(pCt.chCode[0]),len(pCt.chCode))
+			fmt.Printf("交易所代码 chWindCode:%s \n", chCode)
+			_, err1 = io.WriteString(f, string(chCode[:length(chCode)])+"\t")
+			Table[i].chCode = string(chCode[:length(chCode)])
 			//chMarket
 			chMarket := Char2byte(uintptr(unsafe.Pointer(&pCt.chMarket)),unsafe.Sizeof(pCt.chMarket[0]),len(pCt.chMarket))
 			fmt.Printf("市场代码 chMarket:%s \n", chMarket)
@@ -263,11 +272,13 @@ func GetCodeTable(hTdb C.THANDLE, szMarket string)  {
 			fmt.Printf("证券类型 nType:%d \n", pCt.nType)
 			_, err1 = io.WriteString(f,strconv.Itoa((int(int32(pCt.nType))))+"\t")
 			check(err1)
+			Table[i].codeType = int32(pCt.nType)
 			fmt.Println("----------------------------------------")
-			tmpPtr += sizeOf * 100
+			tmpPtr += sizeOf * 1000
 			io.WriteString(f,"\n")
 		}
 	}
+	return Table, int(pCount)
 
 }
 
@@ -462,8 +473,8 @@ func GetTickData(hTdb C.THANDLE, szCode string, szMarket string, nDate int, clnt
 
 
 		fmt.Println("--------------------------------------")
-		i += 100
-		tmpPtr += (sizeOf-2)*100
+		i += 1
+		tmpPtr += (sizeOf-2)*1
 		timeStamp := timeGenerateor(int(tick.nDate),int(tick.nTime))
 		tags := map[string]string{
 			"Code": string(tick.chCode[:]),
@@ -565,8 +576,8 @@ func GetTransaction(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int
 		fmt.Printf("叫买序号: %d \n", transaction.nBidOrder)
 		fmt.Println("---------------------------------------------")
 		//fmt.Printf("成交编号: %d \n", pT.nBidOrder)
-		i += 100
-		tmpPtr += (sizeOf-1)*100
+		i += 1
+		tmpPtr += (sizeOf-1)*1
 		timeStamp := timeGenerateor(int(transaction.nDate),int(transaction.nTime))
 		tags := map[string]string{
 			"Code": string(transaction.chCode[:]),
@@ -707,8 +718,8 @@ func GetOrderQueue(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int,
 		fmt.Printf("明细个数: %d \n", pOQ.nABItems)
 		fmt.Printf("订单明细: %s \n", array2str4C(pOQ.nABVolume, pOQ.nABItems))
 		fmt.Println("---------------------------------------------")
-		i += 100
-		tmpPtr += sizeOf * 100
+		i += 1
+		tmpPtr += sizeOf * 1
 		timeStamp := timeGenerateor(int(pOQ.nDate),int(pOQ.nTime))
 		tags := map[string]string{
 			"Code": string(code[:]),

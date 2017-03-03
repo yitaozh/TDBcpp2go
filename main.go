@@ -61,40 +61,37 @@ func main(){
 
 	c, err := client.NewHTTPClient(client.HTTPConfig{
 		Addr:     "http://114.80.253.159:8086",
+		//Addr:     "http://localhost:8086",
 		Username: username,
 		Password: password,
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Hello World! 1");
 	_, err = queryDB(c, fmt.Sprintf("DROP DATABASE %s", "TDB"))
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Hello World! 2");
 	_, err = queryDB(c, fmt.Sprintf("CREATE DATABASE %s", "TDB"))
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Hello World! 3");
 
 	//GetKData(hTdb, "600715.SH", "SH-2-0", 20170106, 20170106, C.CYC_MINUTE, 0, 0, 1,c);	//autocomplete k-minute
 	//GetTickData(hTdb, "000001.SZ", "SZ-2-0", 20161122,c);//带买卖盘的tick					//tick
 	//GetTransaction(hTdb, "000001.sz", "SZ-2-0", 20150910, c);					//Transaction
-	//GetOrder(hTdb, "000001.sz", "SZ-2-0", 20150910, c);					//Order
+	//GetOrder(hTdb, "112436.SZ", "SZ-2-0", 20170203, c);					//Order
 	//GetOrderQueue(hTdb, "000001.sz", "SZ-2-0", 20150910,c);					//OrderQueue
 	//UseEZFFormula(hTdb);									//test for formula
-	//GetCodeTable(hTdb, "SZ-2-0")
-	var i int
-	for i = 20170201; i<=20170228; i++ {
-		//GetKData(hTdb, "000001.sz", "SZ-2-0", i, i, C.CYC_MINUTE, 0, 0, 1,c);			//autocomplete k-minute
-		//GetTickData(hTdb, "000001.SZ", "SZ-2-0", i,c);//带买卖盘的tick				//tick
-		//GetTransaction(hTdb, "000001.sz", "SZ-2-0", i, c);					//Transaction
-		GetOrder(hTdb, "000001.sz", "SZ-2-0", i, c);							//Order
-		//GetOrderQueue(hTdb, "000001.sz", "SZ-2-0", i,c);					//OrderQueue
-		//UseEZFFormula(hTdb);									//test for formula
-		//GetCodeTable(hTdb, "SZ-2-0")
+	Table, count := GetCodeTable(hTdb, "SZ-2-0")
+	for i := 20170201; i<=20170228; i++ {
+		for j := 0; j < count; j++ {
+			GetKData(hTdb, Table[j].chWindCode, "SZ-2-0", i, i, C.CYC_MINUTE, 0, 0, 1,c);			//autocomplete k-minute
+			GetTickData(hTdb, Table[j].chWindCode, "SZ-2-0", i,c);//带买卖盘的tick				//tick
+			GetTransaction(hTdb, Table[j].chWindCode, "SZ-2-0", i, c);					//Transaction
+			GetOrder(hTdb, Table[j].chWindCode, "SZ-2-0", i, c);							//Order
+			GetOrderQueue(hTdb, Table[j].chWindCode, "SZ-2-0", i,c);					//OrderQueue
+			//UseEZFFormula(hTdb);
+		}
 	}
-
 }
