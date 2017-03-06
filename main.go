@@ -60,8 +60,8 @@ func main(){
 	fmt.Printf("交易所代码 chWindCode:%s \n", Char2byte(uintptr(unsafe.Pointer(&pCode.chCode)),unsafe.Sizeof(pCode.chCode[0]),len(pCode.chCode)))
 
 	c, err := client.NewHTTPClient(client.HTTPConfig{
-		//Addr:     "http://114.80.253.159:8086",
-		Addr:     "http://localhost:8086",
+		Addr:     "http://114.80.253.159:8086",
+		//Addr:     "http://localhost:8086",
 		Username: username,
 		Password: password,
 	})
@@ -84,7 +84,7 @@ func main(){
 	//GetOrderQueue(hTdb, "000001.sz", "SZ-2-0", 20150910,c);					//OrderQueue
 	//UseEZFFormula(hTdb);									//test for formula
 	Table, count := GetCodeTable(hTdb, "SZ-2-0")
-	for i := 20170208; i<=20170208; i++ {
+	for i := 20170201; i<=20170228; i++ {
 		for j := 0; j < count; j++ {
 			GetKData(hTdb, Table[j].chWindCode, Table[j].chMarket, i, i, C.CYC_MINUTE, 0, 0, 1,c);			//autocomplete k-minute
 			GetTickData(hTdb, Table[j].chWindCode, Table[j].chMarket, i,c);//带买卖盘的tick				//tick
