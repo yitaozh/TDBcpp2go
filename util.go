@@ -31,6 +31,7 @@ type Code_Table struct {
 	chWindCode string
 	chCode string
 	codeType int32
+	chMarket string
 }
 
 type Define_Tick struct{
@@ -205,8 +206,17 @@ func timeGenerateor(nDate int, nTime int) time.Time {
 	return newTime
 }
 //请求代码表
+func length32(arr [32]byte) int{
+	var i int
+	for i=0; i<32; i++{
+		if arr[i]==0{
+			return i
+		}
+	}
+	return i
+}
 
-func length(arr [256]byte) int{
+func length256(arr [256]byte) int{
 	var i int
 	for i=0; i<256; i++{
 		if arr[i]==0{
@@ -245,25 +255,27 @@ func GetCodeTable(hTdb C.THANDLE, szMarket string)([9000]Code_Table, int){
 	tmpPtr := uintptr(unsafe.Pointer(pCodetable))
 	sizeOf := unsafe.Sizeof(*pCodetable)
 	if outPutTable {
-		for i:=0; i<int(pCount);i+=1000 {
+		for i:=0; i<int(pCount);i+=1 {
 			pCt := (*C.TDBDefine_Code)(unsafe.Pointer(tmpPtr))
 			//code
 			chWindCode := Char2byte(uintptr(unsafe.Pointer(&pCt.chWindCode)),unsafe.Sizeof(pCt.chWindCode[0]),len(pCt.chWindCode))
 			fmt.Printf("万得代码 chWindCode:%s \n", chWindCode)
-			_, err1 := io.WriteString(f, string(chWindCode[:length(chWindCode)])+"\t")
-			Table[i].chWindCode = string(chWindCode[:length(chWindCode)])
+			_, err1 := io.WriteString(f, string(chWindCode[:length256(chWindCode)])+"\t")
+			Table[i].chWindCode = string(chWindCode[:length256(chWindCode)])
 			//chWindCode
 			chCode := Char2byte(uintptr(unsafe.Pointer(&pCt.chCode)),unsafe.Sizeof(pCt.chCode[0]),len(pCt.chCode))
 			fmt.Printf("交易所代码 chWindCode:%s \n", chCode)
-			_, err1 = io.WriteString(f, string(chCode[:length(chCode)])+"\t")
-			Table[i].chCode = string(chCode[:length(chCode)])
+			_, err1 = io.WriteString(f, string(chCode[:length256(chCode)])+"\t")
+			Table[i].chCode = string(chCode[:length256(chCode)])
 			//chMarket
 			chMarket := Char2byte(uintptr(unsafe.Pointer(&pCt.chMarket)),unsafe.Sizeof(pCt.chMarket[0]),len(pCt.chMarket))
 			fmt.Printf("市场代码 chMarket:%s \n", chMarket)
+			_, err1 = io.WriteString(f, string(chMarket[:length256(chMarket)])+"\t")
+			Table[i].chMarket = string(chMarket[:length256(chMarket)])
 			//chName
 			chName := Char2byte(uintptr(unsafe.Pointer(&pCt.chCNName)),unsafe.Sizeof(pCt.chCNName[0]),len(pCt.chCNName))
 			fmt.Printf("证券中文名称 chCNName:%s \n", chName)
-			_, err1 = io.WriteString(f,string(chName[:length(chName)])+"\t")
+			_, err1 = io.WriteString(f,string(chName[:length256(chName)])+"\t")
 			check(err1)
 			//chENName
 			chENName := Char2byte(uintptr(unsafe.Pointer(&pCt.chENName)),unsafe.Sizeof(pCt.chENName[0]),len(pCt.chENName))
@@ -274,7 +286,7 @@ func GetCodeTable(hTdb C.THANDLE, szMarket string)([9000]Code_Table, int){
 			check(err1)
 			Table[i].codeType = int32(pCt.nType)
 			fmt.Println("----------------------------------------")
-			tmpPtr += sizeOf * 1000
+			tmpPtr += sizeOf * 1
 			io.WriteString(f,"\n")
 		}
 	}
@@ -325,7 +337,7 @@ func GetKData(hTdb C.THANDLE, szCode string, szMarket string, nBeginDate int, nE
 		i += 1
 		timeStamp := timeGenerateor(int(kL.nDate),int(kL.nTime))
 		tags := map[string]string{
-			"Code": string(code[:]),
+			"Code": string(code[:length256(code)]),
 		}
 		fields := map[string]interface{}{
 			"Open": kL.nOpen,
@@ -429,7 +441,7 @@ func GetTickData(hTdb C.THANDLE, szCode string, szMarket string, nDate int, clnt
 		fmt.Printf("成交量 iVolume:%d \n", tick.iVolume)
 		fmt.Printf("成交额(元) iTurover:%d \n", tick.iTurover)
 		fmt.Printf("成交笔数 nMatchItems:%d \n", tick.nMatchItems)
-		fmt.Printf(" nInterest:%d \n", tick.nInterest)
+		fmt.Printf("nInterest:%d \n", tick.nInterest)
 
 		fmt.Printf("成交标志: chTradeFlag:%c \n", tick.chTradeFlag)
 		fmt.Printf("BS标志: chBSFlag:%c \n", tick.chBSFlag)
@@ -438,7 +450,7 @@ func GetTickData(hTdb C.THANDLE, szCode string, szMarket string, nDate int, clnt
 
 		fmt.Printf("最高 nHigh:%d \n", tick.nHigh)
 		fmt.Printf("最低 nLow:%d \n", tick.nLow)
-		fmt.Printf("开盘 nOpen:%d \n",tick.nOpen)
+		fmt.Printf("开盘 nOpen:%d \n", tick.nOpen)
 		fmt.Printf("前收盘 nPreClose:%d \n", tick.nPreClose)
 
 		//买卖盘字段
@@ -458,67 +470,69 @@ func GetTickData(hTdb C.THANDLE, szCode string, szMarket string, nDate int, clnt
 
 
 		//期货字段
-//		fmt.Printf("结算价 nSettle:%d \n", pT.nSettle)
-//		fmt.Printf("持仓量 nPosition:%d \n", pT.nPosition)
-//		fmt.Printf("虚实度 nCurDelta:%d \n", pT.nCurDelta)
-//		fmt.Printf("昨结算 nPreSettle:%d \n", pT.nPreSettle)
-//		fmt.Printf("昨持仓 nPrePosition:%d \n", pT.nPrePosition)
+		//		fmt.Printf("结算价 nSettle:%d \n", pT.nSettle)
+		//		fmt.Printf("持仓量 nPosition:%d \n", pT.nPosition)
+		//		fmt.Printf("虚实度 nCurDelta:%d \n", pT.nCurDelta)
+		//		fmt.Printf("昨结算 nPreSettle:%d \n", pT.nPreSettle)
+		//		fmt.Printf("昨持仓 nPrePosition:%d \n", pT.nPrePosition)
 
 		//指数
-//		fmt.Printf("不加权指数 nIndex:%d \n", pT.nIndex)
-//		fmt.Printf("品种总数 nStocks:%d \n", pT.nStocks)
-//		fmt.Printf("上涨品种数 nUps:%d \n", pT.nUps)
-//		fmt.Printf("下跌品种数 nDowns:%d \n", pT.nDowns)
-//		fmt.Printf("持平品种数 nHoldLines:%d \n", pT.nHoldLines)
+		//		fmt.Printf("不加权指数 nIndex:%d \n", pT.nIndex)
+		//		fmt.Printf("品种总数 nStocks:%d \n", pT.nStocks)
+		//		fmt.Printf("上涨品种数 nUps:%d \n", pT.nUps)
+		//		fmt.Printf("下跌品种数 nDowns:%d \n", pT.nDowns)
+		//		fmt.Printf("持平品种数 nHoldLines:%d \n", pT.nHoldLines)
 
 
 		fmt.Println("--------------------------------------")
 		i += 1
-		tmpPtr += (sizeOf-2)*1
-		timeStamp := timeGenerateor(int(tick.nDate),int(tick.nTime))
-		tags := map[string]string{
-			"Code": string(tick.chCode[:]),
-			"TradeFlag": string(tick.chTradeFlag),
-		}
-		fields := map[string]interface{}{
-			"Price": tick.nPrice,
-			"Volume": tick.iVolume,
-			"Turover": tick.iTurover,
-			"MatchItems": tick.nMatchItems,
-			"Interest": tick.nInterest,
-			"BSFlag": tick.chBSFlag,
-			"AccVolume": tick.iAccVolume,
-			"AccTurover": tick.iAccTurover,
-			"High": tick.nHigh,
-			"Low": tick.nLow,
-			"Open": tick.nOpen,
-			"PreClose": tick.nPreClose,
-			//期货字段
-//			"Settle": tick.nSettle,
-//			"Position": tick.nPosition,
-//			"CurDelta": tick.nCurDelta,
-//			"PreSettle": tick.nPreSettle,
-//			"PrePosition": tick.nPrePosition,
-			"AskPrice": array2str4int(tick.nAskPrice, 10),
-			"AskVolume": array2str4uint(tick.nAskVolume, 10),
-			"BidPrice": array2str4int(tick.nBidPrice, 10),
-			"BidVolume": array2str4uint(tick.nBidVolume, 10),
-			"AskAvPrice": tick.nAskAvPrice,
-			"BidAvPrice": tick.nBidAvPrice,
-			"TotalAskVolume": tick.iTotalAskVolume,
-			"TotalBidVolume": tick.iTotalBidVolume,
+		tmpPtr += (sizeOf - 2) * 1
+		if tick.nDate > 0 && tick.nTime > 0 {
+			timeStamp := timeGenerateor(int(tick.nDate), int(tick.nTime))
+			tags := map[string]string{
+				"Code": string(tick.chCode[:length32(tick.chCode)]),
+				"TradeFlag": string(tick.chTradeFlag),
+			}
+			fields := map[string]interface{}{
+				"Price": tick.nPrice,
+				"Volume": tick.iVolume,
+				"Turover": tick.iTurover,
+				"MatchItems": tick.nMatchItems,
+				"Interest": tick.nInterest,
+				"BSFlag": tick.chBSFlag,
+				"AccVolume": tick.iAccVolume,
+				"AccTurover": tick.iAccTurover,
+				"High": tick.nHigh,
+				"Low": tick.nLow,
+				"Open": tick.nOpen,
+				"PreClose": tick.nPreClose,
+				//期货字段
+				//			"Settle": tick.nSettle,
+				//			"Position": tick.nPosition,
+				//			"CurDelta": tick.nCurDelta,
+				//			"PreSettle": tick.nPreSettle,
+				//			"PrePosition": tick.nPrePosition,
+				"AskPrice": array2str4int(tick.nAskPrice, 10),
+				"AskVolume": array2str4uint(tick.nAskVolume, 10),
+				"BidPrice": array2str4int(tick.nBidPrice, 10),
+				"BidVolume": array2str4uint(tick.nBidVolume, 10),
+				"AskAvPrice": tick.nAskAvPrice,
+				"BidAvPrice": tick.nBidAvPrice,
+				"TotalAskVolume": tick.iTotalAskVolume,
+				"TotalBidVolume": tick.iTotalBidVolume,
 
+			}
+			pt, err := client.NewPoint(
+				"TDBTick",
+				tags,
+				fields,
+				timeStamp,
+			)
+			if err != nil {
+				log.Fatal(err)
+			}
+			bp.AddPoint(pt)
 		}
-		pt, err := client.NewPoint(
-			"TDBTick",
-			tags,
-			fields,
-			timeStamp,
-		)
-		if err != nil {
-			log.Fatal(err)
-		}
-		bp.AddPoint(pt)
 	}
 	if err := clnt.Write(bp); err != nil {
 		log.Fatal(err)
@@ -580,7 +594,7 @@ func GetTransaction(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int
 		tmpPtr += (sizeOf-1)*1
 		timeStamp := timeGenerateor(int(transaction.nDate),int(transaction.nTime))
 		tags := map[string]string{
-			"Code": string(transaction.chCode[:]),
+			"Code": string(transaction.chCode[:length32(transaction.chCode)]),
 			"OrderKind": string(transaction.chOrderKind),
 			"FunctionCode": string(transaction.chFunctionCode),
 			"BSFlag": string(transaction.chBSFlag),
@@ -659,7 +673,7 @@ func GetOrder(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int, clnt
 		tmpPtr += (sizeOf-2)*1
 		timeStamp := timeGenerateor(int(order.nDate),int(order.nTime))
 		tags := map[string]string{
-			"Code": string(order.chCode[:]),
+			"Code": string(order.chCode[:length32(order.chCode)]),
 			"FunctionCode": string(order.chFunctionCode),
 		}
 		fields := map[string]interface{}{
@@ -722,7 +736,7 @@ func GetOrderQueue(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int,
 		tmpPtr += sizeOf * 1
 		timeStamp := timeGenerateor(int(pOQ.nDate),int(pOQ.nTime))
 		tags := map[string]string{
-			"Code": string(code[:]),
+			"Code": string(code[:length256(code)]),
 		}
 		fields := map[string]interface{}{
 			"Side": pOQ.nSide,

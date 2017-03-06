@@ -60,8 +60,8 @@ func main(){
 	fmt.Printf("交易所代码 chWindCode:%s \n", Char2byte(uintptr(unsafe.Pointer(&pCode.chCode)),unsafe.Sizeof(pCode.chCode[0]),len(pCode.chCode)))
 
 	c, err := client.NewHTTPClient(client.HTTPConfig{
-		Addr:     "http://114.80.253.159:8086",
-		//Addr:     "http://localhost:8086",
+		//Addr:     "http://114.80.253.159:8086",
+		Addr:     "http://localhost:8086",
 		Username: username,
 		Password: password,
 	})
@@ -77,21 +77,25 @@ func main(){
 		log.Fatal(err)
 	}
 
-	//GetKData(hTdb, "600715.SH", "SH-2-0", 20170106, 20170106, C.CYC_MINUTE, 0, 0, 1,c);	//autocomplete k-minute
+	//GetKData(hTdb, "000001.SZ", "SZ-2-0", 20170208, 20170208, C.CYC_MINUTE, 0, 0, 1,c);	//autocomplete k-minute
 	//GetTickData(hTdb, "000001.SZ", "SZ-2-0", 20161122,c);//带买卖盘的tick					//tick
 	//GetTransaction(hTdb, "000001.sz", "SZ-2-0", 20150910, c);					//Transaction
 	//GetOrder(hTdb, "112436.SZ", "SZ-2-0", 20170203, c);					//Order
 	//GetOrderQueue(hTdb, "000001.sz", "SZ-2-0", 20150910,c);					//OrderQueue
 	//UseEZFFormula(hTdb);									//test for formula
 	Table, count := GetCodeTable(hTdb, "SZ-2-0")
-	for i := 20170201; i<=20170228; i++ {
+	for i := 20170208; i<=20170208; i++ {
 		for j := 0; j < count; j++ {
-			GetKData(hTdb, Table[j].chWindCode, "SZ-2-0", i, i, C.CYC_MINUTE, 0, 0, 1,c);			//autocomplete k-minute
-			GetTickData(hTdb, Table[j].chWindCode, "SZ-2-0", i,c);//带买卖盘的tick				//tick
-			GetTransaction(hTdb, Table[j].chWindCode, "SZ-2-0", i, c);					//Transaction
-			GetOrder(hTdb, Table[j].chWindCode, "SZ-2-0", i, c);							//Order
-			GetOrderQueue(hTdb, Table[j].chWindCode, "SZ-2-0", i,c);					//OrderQueue
+			GetKData(hTdb, Table[j].chWindCode, Table[j].chMarket, i, i, C.CYC_MINUTE, 0, 0, 1,c);			//autocomplete k-minute
+			GetTickData(hTdb, Table[j].chWindCode, Table[j].chMarket, i,c);//带买卖盘的tick				//tick
+			GetTransaction(hTdb, Table[j].chWindCode, Table[j].chMarket, i, c);					//Transaction
+			GetOrder(hTdb, Table[j].chWindCode, Table[j].chMarket, i, c);							//Order
+			GetOrderQueue(hTdb, Table[j].chWindCode, Table[j].chMarket, i,c);					//OrderQueue
 			//UseEZFFormula(hTdb);
 		}
 	}
+	/*for j := 0; j < count; j=j+10 {
+		fmt.Println(Table[j].chWindCode,"\t",Table[j].codeType)
+	}*/
+	fmt.Println(count)
 }
