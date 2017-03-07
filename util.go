@@ -9,7 +9,6 @@ package main
 */
 import "C"
 import (
-	"fmt"
 	"unsafe"
 	"time"
 	"strconv"
@@ -242,15 +241,15 @@ func GetCodeTable(hTdb C.THANDLE, szMarket string)([9000]Code_Table, int){
 	os.Remove(filename)
 	if checkFileIsExist(filename) {  //如果文件存在
 		f, err1 = os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, os.ModeAppend)  //打开文件
-		fmt.Println("文件存在");
+		//fmt.Println("文件存在");
 	}else {
 		f, err1 = os.Create(filename)  //创建文件
-		fmt.Println("文件不存在");
+		//fmt.Println("文件不存在");
 	}
 	check(err1)
 	var Table [9000]Code_Table
-	fmt.Println("---------------------------Code Table--------------------")
-	fmt.Printf("收到代码表项数：%d，\n\n",int64(pCount))
+	/*fmt.Println("---------------------------Code Table--------------------")
+	fmt.Printf("收到代码表项数：%d，\n\n",int64(pCount))*/
 	//输出
 	tmpPtr := uintptr(unsafe.Pointer(pCodetable))
 	sizeOf := unsafe.Sizeof(*pCodetable)
@@ -259,35 +258,35 @@ func GetCodeTable(hTdb C.THANDLE, szMarket string)([9000]Code_Table, int){
 			pCt := (*C.TDBDefine_Code)(unsafe.Pointer(tmpPtr))
 			//code
 			chWindCode := Char2byte(uintptr(unsafe.Pointer(&pCt.chWindCode)),unsafe.Sizeof(pCt.chWindCode[0]),len(pCt.chWindCode))
-			fmt.Printf("万得代码 chWindCode:%s \n", chWindCode)
+			//fmt.Printf("万得代码 chWindCode:%s \n", chWindCode)
 			_, err1 := io.WriteString(f, string(chWindCode[:length256(chWindCode)])+"\t")
 			Table[i].chWindCode = string(chWindCode[:length256(chWindCode)])
 			//chWindCode
 			chCode := Char2byte(uintptr(unsafe.Pointer(&pCt.chCode)),unsafe.Sizeof(pCt.chCode[0]),len(pCt.chCode))
-			fmt.Printf("交易所代码 chWindCode:%s \n", chCode)
-			_, err1 = io.WriteString(f, string(chCode[:length256(chCode)])+"\t")
+			//fmt.Printf("交易所代码 chWindCode:%s \n", chCode)
+			//_, err1 = io.WriteString(f, string(chCode[:length256(chCode)])+"\t")
 			Table[i].chCode = string(chCode[:length256(chCode)])
 			//chMarket
 			chMarket := Char2byte(uintptr(unsafe.Pointer(&pCt.chMarket)),unsafe.Sizeof(pCt.chMarket[0]),len(pCt.chMarket))
-			fmt.Printf("市场代码 chMarket:%s \n", chMarket)
+			//fmt.Printf("市场代码 chMarket:%s \n", chMarket)
 			_, err1 = io.WriteString(f, string(chMarket[:length256(chMarket)])+"\t")
 			Table[i].chMarket = string(chMarket[:length256(chMarket)])
 			//chName
-			chName := Char2byte(uintptr(unsafe.Pointer(&pCt.chCNName)),unsafe.Sizeof(pCt.chCNName[0]),len(pCt.chCNName))
-			fmt.Printf("证券中文名称 chCNName:%s \n", chName)
-			_, err1 = io.WriteString(f,string(chName[:length256(chName)])+"\t")
+			//chName := Char2byte(uintptr(unsafe.Pointer(&pCt.chCNName)),unsafe.Sizeof(pCt.chCNName[0]),len(pCt.chCNName))
+			//fmt.Printf("证券中文名称 chCNName:%s \n", chName)
+			//_, err1 = io.WriteString(f,string(chName[:length256(chName)])+"\t")
 			check(err1)
 			//chENName
-			chENName := Char2byte(uintptr(unsafe.Pointer(&pCt.chENName)),unsafe.Sizeof(pCt.chENName[0]),len(pCt.chENName))
-			fmt.Printf("证券英文名称 chENName:%s \n", chENName)
+			//chENName := Char2byte(uintptr(unsafe.Pointer(&pCt.chENName)),unsafe.Sizeof(pCt.chENName[0]),len(pCt.chENName))
+			//fmt.Printf("证券英文名称 chENName:%s \n", chENName)
 
-			fmt.Printf("证券类型 nType:%d \n", pCt.nType)
-			_, err1 = io.WriteString(f,strconv.Itoa((int(int32(pCt.nType))))+"\t")
+			//fmt.Printf("证券类型 nType:%d \n", pCt.nType)
+			//_, err1 = io.WriteString(f,strconv.Itoa((int(int32(pCt.nType))))+"\t")
 			check(err1)
 			Table[i].codeType = int32(pCt.nType)
-			fmt.Println("----------------------------------------")
+			//fmt.Println("----------------------------------------")
 			tmpPtr += sizeOf * 1
-			io.WriteString(f,"\n")
+			//io.WriteString(f,"\n")
 		}
 	}
 	return Table, int(pCount)
@@ -314,8 +313,8 @@ func GetKData(hTdb C.THANDLE, szCode string, szMarket string, nBeginDate int, nE
 
 	C.TDB_GetKLine(hTdb,req,&kLine,&pCount)
 	req=nil
-	fmt.Println("---------------------------K Data--------------------")
-	fmt.Printf("数据条数：%d,打印 1/100 条\n\n",pCount)
+	//fmt.Println("---------------------------K Data--------------------")
+	//fmt.Printf("数据条数：%d,打印 1/100 条\n\n",pCount)
 	tmpPtr := uintptr(unsafe.Pointer(kLine))
 
 	bp, _ := client.NewBatchPoints(client.BatchPointsConfig{
@@ -326,13 +325,13 @@ func GetKData(hTdb C.THANDLE, szCode string, szMarket string, nBeginDate int, nE
 	sizeOf := unsafe.Sizeof(*kLine)
 	for i:=0; i<int(pCount);  {
 		kL := (*C.TDBDefine_KLine)(unsafe.Pointer(tmpPtr))
-		windCode := Char2byte(uintptr(unsafe.Pointer(&kL.chWindCode)),unsafe.Sizeof(kL.chWindCode[0]),len(kL.chWindCode))
+		_ = Char2byte(uintptr(unsafe.Pointer(&kL.chWindCode)),unsafe.Sizeof(kL.chWindCode[0]),len(kL.chWindCode))
 		code := Char2byte(uintptr(unsafe.Pointer(&kL.chCode)),unsafe.Sizeof(kL.chCode[0]),len(kL.chCode))
-		fmt.Printf("WindCode:%s\n Code:%s\n Date:%d\n Time:%d\n Open:%d\n High:%d\n Low:%d\n Close:%v\n Volume:%v\n Turover:%d\n MatchItem:%d\n Interest:%d\n",
+		/*fmt.Printf("WindCode:%s\n Code:%s\n Date:%d\n Time:%d\n Open:%d\n High:%d\n Low:%d\n Close:%v\n Volume:%v\n Turover:%d\n MatchItem:%d\n Interest:%d\n",
 			windCode,//kL.chWindCode
 			code,//kL.chCode
-			kL.nDate, kL.nTime, kL.nOpen, kL.nHigh, kL.nLow, kL.nClose, kL.iVolume, kL.iTurover, kL.nMatchItems, kL.nInterest )
-		fmt.Println("--------------------------------------")
+			kL.nDate, kL.nTime, kL.nOpen, kL.nHigh, kL.nLow, kL.nClose, kL.iVolume, kL.iTurover, kL.nMatchItems, kL.nInterest )*/
+		//fmt.Println("--------------------------------------")
 		tmpPtr += sizeOf*1
 		i += 1
 		timeStamp := timeGenerateor(int(kL.nDate),int(kL.nTime))
@@ -381,8 +380,8 @@ func GetTickData(hTdb C.THANDLE, szCode string, szMarket string, nDate int, clnt
 	C.TDB_GetTick(hTdb,&req,&pTick, &pCount)
 
 	var tick Define_Tick
-	fmt.Println("------------------------Tick Data---------------------------")
-	fmt.Printf("共收到 %d 条Tick数据， 打印 1/100 条：\n", pCount)
+	//fmt.Println("------------------------Tick Data---------------------------")
+	//fmt.Printf("共收到 %d 条Tick数据， 打印 1/100 条：\n", pCount)
 
 	bp, _ := client.NewBatchPoints(client.BatchPointsConfig{
 		Database:  "TDB",
@@ -433,7 +432,7 @@ func GetTickData(hTdb C.THANDLE, szCode string, szMarket string, nDate int, clnt
 		binary.Read(bytes.NewBuffer(buf[362:366]), binary.LittleEndian, &tick.nResv2)
 		binary.Read(bytes.NewBuffer(buf[366:370]), binary.LittleEndian, &tick.nResv3)
 
-		fmt.Printf("万得代码 chWindCode:%s \n", tick.chWindCode)
+		/*fmt.Printf("万得代码 chWindCode:%s \n", tick.chWindCode)
 		fmt.Printf("日期 nDate:%d \n", tick.nDate)
 		fmt.Printf("时间 nTime:%d \n", tick.nTime)
 
@@ -451,10 +450,10 @@ func GetTickData(hTdb C.THANDLE, szCode string, szMarket string, nDate int, clnt
 		fmt.Printf("最高 nHigh:%d \n", tick.nHigh)
 		fmt.Printf("最低 nLow:%d \n", tick.nLow)
 		fmt.Printf("开盘 nOpen:%d \n", tick.nOpen)
-		fmt.Printf("前收盘 nPreClose:%d \n", tick.nPreClose)
+		fmt.Printf("前收盘 nPreClose:%d \n", tick.nPreClose)*/
 
 		//买卖盘字段
-		var strOut string
+		/*var strOut string
 		strOut = array2str4int(tick.nAskPrice, 10)
 		fmt.Printf("叫卖价 nAskPrice:%s \n", strOut)
 		strOut = array2str4uint(tick.nAskVolume, 10)
@@ -466,7 +465,7 @@ func GetTickData(hTdb C.THANDLE, szCode string, szMarket string, nDate int, clnt
 		fmt.Printf("加权平均叫卖价 nAskAvPrice:%d \n", tick.nAskAvPrice)
 		fmt.Printf("加权平均叫买价 nBidAvPrice:%d \n", tick.nBidAvPrice)
 		fmt.Printf("叫卖总量 iTotalAskVolume:%v \n", tick.iTotalAskVolume)
-		fmt.Printf("叫买总量 iTotalBidVolume:%v \n", tick.iTotalBidVolume)
+		fmt.Printf("叫买总量 iTotalBidVolume:%v \n", tick.iTotalBidVolume)*/
 
 
 		//期货字段
@@ -484,7 +483,7 @@ func GetTickData(hTdb C.THANDLE, szCode string, szMarket string, nDate int, clnt
 		//		fmt.Printf("持平品种数 nHoldLines:%d \n", pT.nHoldLines)
 
 
-		fmt.Println("--------------------------------------")
+		//fmt.Println("--------------------------------------")
 		i += 1
 		tmpPtr += (sizeOf - 2) * 1
 		if tick.nDate > 0 && tick.nTime > 0 {
@@ -554,9 +553,8 @@ func GetTransaction(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int
 	C.TDB_GetTransaction(hTdb,&req, &pTransaction, &pCount)
 
 	var transaction Define_Transaction
-	fmt.Println("-----------------------Transaction Data----------------------------")
-	fmt.Printf("收到 %d 条逐笔成交消息，打印 1/10000 条\n", pCount)
-
+	/*fmt.Println("-----------------------Transaction Data----------------------------")
+	fmt.Printf("收到 %d 条逐笔成交消息，打印 1/10000 条\n", pCount)*/
 	bp, _ := client.NewBatchPoints(client.BatchPointsConfig{
 		Database:  "TDB",
 		Precision: "us",
@@ -579,7 +577,7 @@ func GetTransaction(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int
 		binary.Read(bytes.NewBuffer(buf[83:87]), binary.LittleEndian, &transaction.nTradeVolume)
 		binary.Read(bytes.NewBuffer(buf[87:91]), binary.LittleEndian, &transaction.nAskOrder)
 		binary.Read(bytes.NewBuffer(buf[91:95]), binary.LittleEndian, &transaction.nBidOrder)
-		fmt.Printf("成交时间(Date): %d \n", transaction.nDate)
+		/*fmt.Printf("成交时间(Date): %d \n", transaction.nDate)
 		fmt.Printf("成交时间: %d \n", transaction.nTime)
 		fmt.Printf("成交代码: %c \n", transaction.chFunctionCode)
 		fmt.Printf("委托类别: %c \n", transaction.chOrderKind)
@@ -588,7 +586,7 @@ func GetTransaction(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int
 		fmt.Printf("成交数量: %d \n", transaction.nTradeVolume)
 		fmt.Printf("叫卖序号: %d \n", transaction.nAskOrder)
 		fmt.Printf("叫买序号: %d \n", transaction.nBidOrder)
-		fmt.Println("---------------------------------------------")
+		fmt.Println("---------------------------------------------")*/
 		//fmt.Printf("成交编号: %d \n", pT.nBidOrder)
 		i += 1
 		tmpPtr += (sizeOf-1)*1
@@ -637,8 +635,8 @@ func GetOrder(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int, clnt
 	C.TDB_GetOrder(hTdb,&req, &pOrder, &pCount)
 
 	var order Define_Order
-	fmt.Println("-------------------------Order Data--------------------------")
-	fmt.Printf("收到 %d 条逐笔委托消息，打印 1/10000 条\n", pCount)
+	/*fmt.Println("-------------------------Order Data--------------------------")
+	fmt.Printf("收到 %d 条逐笔委托消息，打印 1/10000 条\n", pCount)*/
 
 	bp, _ := client.NewBatchPoints(client.BatchPointsConfig{
 		Database:  "TDB",
@@ -660,14 +658,14 @@ func GetOrder(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int, clnt
 		binary.Read(bytes.NewBuffer(buf[81:82]), binary.LittleEndian, &order.chFunctionCode)
 		binary.Read(bytes.NewBuffer(buf[82:86]), binary.LittleEndian, &order.nOrderPrice)
 		binary.Read(bytes.NewBuffer(buf[86:90]), binary.LittleEndian, &order.nOrderVolume)
-		fmt.Printf("订单时间(Date): %d \n", order.nDate)
+		/*fmt.Printf("订单时间(Date): %d \n", order.nDate)
 		fmt.Printf("委托时间(HHMMSSmmm): %d \n", order.nTime)
 		fmt.Printf("委托编号Order: %d \n", order.nOrder)
 		fmt.Printf("委托类别OrderKind: %c \n", order.chOrderKind)
 		fmt.Printf("委托代码FunctionCode: %c \n", order.chFunctionCode)
 		fmt.Printf("委托价格OrderPrice: %d \n", order.nOrderPrice)
 		fmt.Printf("委托数量OrderVolume: %d \n", order.nOrderVolume)
-		fmt.Println("---------------------------------------------")
+		fmt.Println("---------------------------------------------")*/
 		//fmt.Println(order)
 		i += 1
 		tmpPtr += (sizeOf-2)*1
@@ -711,8 +709,8 @@ func GetOrderQueue(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int,
 	var pCount C.int
 	C.TDB_GetOrderQueue(hTdb, &req, &pOrderQueue, &pCount)
 
-	fmt.Println("-------------------OrderQueue Data-------------");
-	fmt.Printf("收到 %d 条委托队列消息，打印 1/1000 条\n", pCount);
+	/*fmt.Println("-------------------OrderQueue Data-------------");
+	fmt.Printf("收到 %d 条委托队列消息，打印 1/1000 条\n", pCount);*/
 
 	bp, _ := client.NewBatchPoints(client.BatchPointsConfig{
 		Database:  "TDB",
@@ -724,14 +722,14 @@ func GetOrderQueue(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int,
 	for i := 0; i < int(pCount); {
 		pOQ := (*C.TDBDefine_OrderQueue)(unsafe.Pointer(tmpPtr))
 		code := Char2byte(uintptr(unsafe.Pointer(&pOQ.chCode)),unsafe.Sizeof(pOQ.chCode[0]),len(pOQ.chCode))
-		fmt.Printf("订单时间(Date): %d \n", pOQ.nDate)
+		/*fmt.Printf("订单时间(Date): %d \n", pOQ.nDate)
 		fmt.Printf("订单时间(HHMMSS): %d \n", pOQ.nTime)
 		fmt.Printf("买卖方向('B':Bid 'A':Ask): %c \n", pOQ.nSide)
 		fmt.Printf("成交价格: %d \n", pOQ.nPrice)
 		fmt.Printf("订单数量: %d \n", pOQ.nOrderItems)
 		fmt.Printf("明细个数: %d \n", pOQ.nABItems)
 		fmt.Printf("订单明细: %s \n", array2str4C(pOQ.nABVolume, pOQ.nABItems))
-		fmt.Println("---------------------------------------------")
+		fmt.Println("---------------------------------------------")*/
 		i += 1
 		tmpPtr += sizeOf * 1
 		timeStamp := timeGenerateor(int(pOQ.nDate),int(pOQ.nTime))
@@ -763,8 +761,9 @@ func GetOrderQueue(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int,
 
 
 //指标公式
+/*
 func UseEZFFormula(hTdb C.THANDLE) {
-	fmt.Println("-------------------UseEZFFormula-------------");
+	//fmt.Println("-------------------UseEZFFormula-------------");
 	//公式的编写，请参考<<TRANSEND-TS-M0001 易编公式函数表V1(2).0-20110822.pdf>>
 	strName := "KDJ"
 	strContent := "INPUT:N(9), M1(3,1,100,2), M2(3);RSV:=(CLOSE-LLV(LOW,N))/(HHV(HIGH,N)-LLV(LOW,N))*100;K:SMA(RSV,M1,1);D:SMA(K,M2,1);J:3*K-2*D;"
@@ -772,7 +771,7 @@ func UseEZFFormula(hTdb C.THANDLE) {
 	//添加公式到服务器并编译，若不过，会有错误返回
 	var addRes *C.TDBDefine_AddFormulaRes = new(C.TDBDefine_AddFormulaRes)
 	nErr := C.TDB_AddFormula(hTdb, C.CString(strName), C.CString(strContent),addRes)
-	fmt.Printf("Add Formula Result:%s\n",Char2byte(uintptr(unsafe.Pointer(&addRes.chInfo)),unsafe.Sizeof(addRes.chInfo[0]),len(addRes.chInfo)))
+	//fmt.Printf("Add Formula Result:%s\n",Char2byte(uintptr(unsafe.Pointer(&addRes.chInfo)),unsafe.Sizeof(addRes.chInfo[0]),len(addRes.chInfo)))
 
 	//查询服务器上的公式，能看到我们刚才上传的"KDJ"
 	var pEZFItem *C.TDBDefine_FormulaItem = nil
@@ -782,11 +781,13 @@ func UseEZFFormula(hTdb C.THANDLE) {
 	tmpPtr := uintptr(unsafe.Pointer(pEZFItem))
 	sizeOf := unsafe.Sizeof(*pEZFItem)
 	for i:=0; i<int(nItems); i++{
-		pEZF := (*C.TDBDefine_FormulaItem)(unsafe.Pointer(tmpPtr))
-		fmt.Printf("公式名称：%s, 参数:%s \n",
+		//pEZF := (*C.TDBDefine_FormulaItem)(unsafe.Pointer(tmpPtr))
+		*/
+/*fmt.Printf("公式名称：%s, 参数:%s \n",
 			Char2byte(uintptr(unsafe.Pointer(&pEZF.chFormulaName)),unsafe.Sizeof(pEZF.chFormulaName[0]),len(pEZF.chFormulaName)),
 			Char2byte(uintptr(unsafe.Pointer(&pEZF.chParam)),unsafe.Sizeof(pEZF.chParam[0]),len(pEZF.chParam)),
-			)
+			)*//*
+
 		tmpPtr += sizeOf
 	}
 
@@ -830,7 +831,7 @@ func UseEZFFormula(hTdb C.THANDLE) {
 	nErr = C.TDB_CalcFormula(hTdb, &reqCalc, pResult)
 
 	//判断错误代码
-	fmt.Printf("计算结果有: %d 条\n", pResult.nRecordCount)
+	//fmt.Printf("计算结果有: %d 条\n", pResult.nRecordCount)
 
 	var i C.int = 0
 	var j C.int = 0
@@ -838,9 +839,9 @@ func UseEZFFormula(hTdb C.THANDLE) {
 	for j=0; j<pResult.nFieldCount;j++{
 		tmpPtr_chFieldName := uintptr(unsafe.Pointer(&pResult.chFieldName[j]))
 		sizeOf_chFieldName := unsafe.Sizeof(pResult.chFieldName[j][1])
-		fmt.Printf("%s  ",Char2byte(tmpPtr_chFieldName,sizeOf_chFieldName,len(pResult.chFieldName[j])))
+		//fmt.Printf("%s  ",Char2byte(tmpPtr_chFieldName,sizeOf_chFieldName,len(pResult.chFieldName[j])))
 	}
-	fmt.Println()
+	//fmt.Println()
 
 	//输出数据
 	for i=0; i<pResult.nRecordCount; i+=100{
@@ -859,6 +860,7 @@ func UseEZFFormula(hTdb C.THANDLE) {
 
 	C.TDB_ReleaseCalcFormula(pResult)
 }
+*/
 
 func queryDB(clnt client.Client, cmd string) (res []client.Result, err error) {
 	q := client.Query{
