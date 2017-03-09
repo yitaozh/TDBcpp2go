@@ -84,7 +84,7 @@ func main(){
 	//GetOrderQueue(hTdb, "000001.sz", "SZ-2-0", 20150910,c);					//OrderQueue
 	//UseEZFFormula(hTdb);									//test for formula
 	Table, count := GetCodeTable(hTdb, "SZ-2-0")
-	for i := 20170203; i<=20170228; i++ {
+	for i := 20170201; i<=20170228; i++ {
 		for j := 0; j < count; j++ {
 			GetKData(hTdb, Table[j].chWindCode, Table[j].chMarket, i, i, C.CYC_MINUTE, 0, 0, 1,c);			//autocomplete k-minute
 			GetTickData(hTdb, Table[j].chWindCode, Table[j].chMarket, i,c);//带买卖盘的tick				//tick
