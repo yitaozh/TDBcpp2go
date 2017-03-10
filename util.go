@@ -289,6 +289,8 @@ func GetCodeTable(hTdb C.THANDLE, szMarket string)([9000]Code_Table, int){
 			//io.WriteString(f,"\n")
 		}
 	}
+	ptr := unsafe.Pointer(pCodetable)
+	C.TDB_Free(ptr)
 	return Table, int(pCount)
 
 }
@@ -362,6 +364,8 @@ func GetKData(hTdb C.THANDLE, szCode string, szMarket string, nBeginDate int, nE
 	if err := clnt.Write(bp); err != nil {
 		log.Fatal(err)
 	}
+	ptr := unsafe.Pointer(kLine)
+	C.TDB_Free(ptr)
 }
 
 //tested good
@@ -536,6 +540,8 @@ func GetTickData(hTdb C.THANDLE, szCode string, szMarket string, nDate int, clnt
 	if err := clnt.Write(bp); err != nil {
 		log.Fatal(err)
 	}
+	ptr := unsafe.Pointer(pTick)
+	C.TDB_Free(ptr)
 }
 
 
@@ -618,7 +624,8 @@ func GetTransaction(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int
 	if err := clnt.Write(bp); err != nil {
 		log.Fatal(err)
 	}
-
+	ptr := unsafe.Pointer(pTransaction)
+	C.TDB_Free(ptr)
 }
 
 //tested good
@@ -695,6 +702,8 @@ func GetOrder(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int, clnt
 	if err := clnt.Write(bp); err != nil {
 		log.Fatal(err)
 	}
+	ptr := unsafe.Pointer(pOrder)
+	C.TDB_Free(ptr)
 }
 
 func GetOrderQueue(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int, clnt client.Client) {
@@ -757,6 +766,8 @@ func GetOrderQueue(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int,
 	if err := clnt.Write(bp); err != nil {
 		log.Fatal(err)
 	}
+	ptr := unsafe.Pointer(pOrderQueue)
+	C.TDB_Free(ptr)
 }
 
 
