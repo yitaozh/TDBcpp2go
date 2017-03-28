@@ -1,7 +1,7 @@
 package main
 
 /*
-#cgo LDFLAGS: -lTDBAPI
+#cgo LDFLAGS: -L../lib -lTDBAPI
 #include "include/TDBAPI.h"
 #include "include/TDBAPIStruct.h"
 #include <stdlib.h>
