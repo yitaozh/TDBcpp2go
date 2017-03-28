@@ -1,0 +1,48 @@
+{
+
+  "Thandle":{
+
+    "SzIP":"114.80.154.34",
+
+    "SzPort":"6261",
+
+    "SzUser":"TD3446699001",
+
+    "SzPassword":"43449360"
+
+  },
+
+  "Influxdb":{
+
+    "Addr":"http://114.80.253.159:8086",
+
+    "LocalAddr":"http://localhost:8086",
+
+    "Database":"wind_data",
+
+    "Username":"mingshi",
+
+    "Password":"mingshi888",
+
+    "StartTime":"20170101",
+
+    "EndTime":"20170231",
+
+    "ChWindCode":"000001.SZ",
+
+    "ChMarket":"SZ-2-0"
+  },
+
+  "Data":{
+
+    "KLine":true,
+
+    "Tick":true,
+
+    "Transaction":true,
+
+    "Order":true,
+
+    "OrderQueue":true
+  }
+}

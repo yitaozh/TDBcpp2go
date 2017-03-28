@@ -12,18 +12,15 @@ import (
 	"unsafe"
 	"time"
 	"strconv"
+	"fmt"
 	"log"
 	"os"
 	"bytes"
 	"encoding/binary"
+	"encoding/json"
 	"github.com/influxdata/influxdb/client/v2"
 	"io"
-)
-
-const (
-	MyDB = "wind_data"
-	username = "mingshi"
-	password = "mingshi888"
+	"io/ioutil"
 )
 
 type Code_Table struct {
@@ -108,6 +105,199 @@ type Define_Order struct{
 	chFunctionCode byte        //委托代码, B, S, C
 	nOrderPrice int32           //委托价格((a double number + 0.00005) *10000)
 	nOrderVolume int32         //委托数量
+}
+
+type JsonStruct struct{
+
+}
+
+type Thandle struct {
+	SzIP       string
+
+	SzPort     string
+
+	SzUser     string
+
+	SzPassword string
+}
+
+type Influxdb struct {
+	Addr       string
+
+	LocalAddr  string
+
+	Database   string
+
+	Username   string
+
+	Password   string
+
+	StartTime  string
+
+	EndTime    string
+
+	ChWindCode string
+
+	ChMarket   string
+}
+
+type Data struct {
+	KLine       bool
+
+	Tick        bool
+
+	Transaction bool
+
+	Order       bool
+
+	OrderQueue  bool
+}
+
+type conf struct {
+
+	TDBConf Thandle `json:"Thandle"`
+
+	Influxconf Influxdb  `json:"Influxdb"`
+
+	Dataconf Data `json:"Data"`
+}
+
+func timeSplit(time string)(int, int, int){
+	year,_ := strconv.Atoi(time[0:4])
+	month,_ := strconv.Atoi(time[4:6])
+	day,_ := strconv.Atoi(time[6:8])
+	return year, month, day
+}
+
+func NewJsonStruct () *JsonStruct {
+
+	return &JsonStruct{}
+
+}
+
+func (self *JsonStruct) Load (filename string, v interface{}) {
+
+	data, err := ioutil.ReadFile(filename)
+
+	if err != nil{
+
+		return
+
+	}
+
+	datajson := []byte(data)
+
+	err = json.Unmarshal(datajson, v)
+
+	if err != nil{
+
+		return
+
+	}
+
+}
+
+func TDBConnection(cfg conf)C.THANDLE{
+	var hTdb C.THANDLE = nil
+
+	var settings C.OPEN_SETTINGS
+
+	//================================================
+	String2char(cfg.TDBConf.SzIP,uintptr(unsafe.Pointer(&settings.szIP)),unsafe.Sizeof(settings.szIP[0]))
+	String2char(cfg.TDBConf.SzPort,uintptr(unsafe.Pointer(&settings.szPort)),unsafe.Sizeof(settings.szPort[0]))
+	String2char(cfg.TDBConf.SzUser,uintptr(unsafe.Pointer(&settings.szUser)),unsafe.Sizeof(settings.szUser[0]))
+	String2char(cfg.TDBConf.SzPassword,uintptr(unsafe.Pointer(&settings.szPassword)),unsafe.Sizeof(settings.szPassword[0]))
+	//================================================
+	settings.nRetryCount = 100
+	settings.nRetryGap = 100
+	settings.nTimeOutVal = 100
+
+	//proxy
+	/*	var proxy_setting C.TDB_PROXY_SETTING
+
+		proxy_setting.nProxyType = C.TDB_PROXY_HTTP11
+		//================================================
+		string2char("10.100.3.42",uintptr(unsafe.Pointer(&proxy_setting.szProxyHostIp)),unsafe.Sizeof(proxy_setting.szProxyHostIp[0]))
+		string2char("12345",uintptr(unsafe.Pointer(&proxy_setting.szProxyPort)),unsafe.Sizeof(proxy_setting.szProxyPort[0]))
+		string2char("1",uintptr(unsafe.Pointer(&proxy_setting.szProxyUser)),unsafe.Sizeof(proxy_setting.szProxyUser[0]))
+		string2char("1",uintptr(unsafe.Pointer(&proxy_setting.szProxyPwd)),unsafe.Sizeof(proxy_setting.szProxyPwd[0]))
+		//================================================
+		*/
+
+	var LoginRes C.TDBDefine_ResLogin
+	//TDB_OpenProxy
+	//hTdb = C.TDB_OpenProxy(&settings, &proxy_setting, &LoginRes)
+
+	hTdb = C.TDB_Open(&settings, &LoginRes)
+	if hTdb == nil {
+		fmt.Println("连接失败！")
+		return nil
+	}
+	return hTdb
+}
+
+func InfluxConnection(cfg conf)client.Client{
+	c, err := client.NewHTTPClient(client.HTTPConfig{
+		Addr:     cfg.Influxconf.LocalAddr,
+		Username: cfg.Influxconf.Username,
+		Password: cfg.Influxconf.Password,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = queryDB(c, fmt.Sprintf("DROP DATABASE %s", "TDB"), cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = queryDB(c, fmt.Sprintf("CREATE DATABASE %s", "TDB"), cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return c
+}
+
+func writeData(hTdb C.THANDLE, cfg conf, c client.Client){
+
+	startYear, startMonth, startDay := timeSplit(cfg.Influxconf.StartTime)
+
+	endYear, endMonth, endDay := timeSplit(cfg.Influxconf.EndTime)
+
+	var Month, Day int
+
+	for year := startYear; year < endYear + 1; year++ {
+		if year==endYear {
+			Month = endMonth
+		} else{
+			Month = 12
+		}
+		for month := startMonth; month < Month + 1; month ++ {
+			if month==endMonth{
+				Day = endDay
+			}else{
+				Day = 31
+			}
+			for day := startDay; day < Day + 1; day++ {
+				date := year * 10000 + month * 100 + day
+				fmt.Println(date)
+				if cfg.Dataconf.KLine{
+					GetKData(hTdb, cfg.Influxconf.ChWindCode, cfg.Influxconf.ChMarket, date, date, C.CYC_MINUTE, 0, 0, 1, c)
+				}
+				if cfg.Dataconf.Tick {
+					GetTickData(hTdb, cfg.Influxconf.ChWindCode, cfg.Influxconf.ChMarket, date, c); //带买卖盘的tick				//tick
+				}
+				if cfg.Dataconf.Transaction {
+					GetTransaction(hTdb, cfg.Influxconf.ChWindCode, cfg.Influxconf.ChMarket, date, c); //Transaction
+				}
+				if cfg.Dataconf.Order {
+					GetOrder(hTdb, cfg.Influxconf.ChWindCode, cfg.Influxconf.ChMarket, date, c); //Order
+				}
+				if cfg.Dataconf.OrderQueue {
+					GetOrderQueue(hTdb, cfg.Influxconf.ChWindCode, cfg.Influxconf.ChMarket, date, c); //OrderQueue
+				}
+				// UseEZFFormula(hTdb);
+			}
+		}
+	}
 }
 
 func combineNums(nDate int32, nTime int32) string {
@@ -224,6 +414,7 @@ func length256(arr [256]byte) int{
 	}
 	return i
 }
+
 func GetCodeTable(hTdb C.THANDLE, szMarket string)([9000]Code_Table, int){
 	var (
 		pCodetable *C.TDBDefine_Code = nil
@@ -873,10 +1064,10 @@ func UseEZFFormula(hTdb C.THANDLE) {
 }
 */
 
-func queryDB(clnt client.Client, cmd string) (res []client.Result, err error) {
+func queryDB(clnt client.Client, cmd string, cfg conf) (res []client.Result, err error) {
 	q := client.Query{
 		Command:  cmd,
-		Database: MyDB,
+		Database: cfg.Influxconf.Database,
 	}
 	if response, err := clnt.Query(q); err == nil {
 		if response.Error() != nil {
