@@ -19,7 +19,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"github.com/influxdata/influxdb/client/v2"
-	"io"
+	//"io"
 	"io/ioutil"
 )
 
@@ -238,7 +238,7 @@ func TDBConnection(cfg conf)C.THANDLE{
 
 func InfluxConnection(cfg conf)client.Client{
 	c, err := client.NewHTTPClient(client.HTTPConfig{
-		Addr:     cfg.Influxconf.LocalAddr,
+		Addr:     cfg.Influxconf.Addr,
 		Username: cfg.Influxconf.Username,
 		Password: cfg.Influxconf.Password,
 	})
@@ -264,37 +264,47 @@ func writeData(hTdb C.THANDLE, cfg conf, c client.Client){
 
 	var Month, Day int
 
-	for year := startYear; year < endYear + 1; year++ {
-		if year==endYear {
-			Month = endMonth
-		} else{
-			Month = 12
-		}
-		for month := startMonth; month < Month + 1; month ++ {
-			if month==endMonth{
-				Day = endDay
-			}else{
-				Day = 31
+	if cfg.Influxconf.ChWindCode == "all" {
+		table, count := GetCodeTable(hTdb, cfg.Influxconf.ChMarket)
+		for i := 0; i < count; i++ {
+			if table[i].codeType == 16 && table[i].chCode[0:2]!="36"{
+				startDate, _ := strconv.Atoi(cfg.Influxconf.StartTime)
+				endDate, _ := strconv.Atoi(cfg.Influxconf.EndTime)
+				GetKData(hTdb, table[i].chWindCode, table[i].chMarket, startDate, endDate, C.CYC_DAY, 0, 0, 1, c)
 			}
-			for day := startDay; day < Day + 1; day++ {
-				date := year * 10000 + month * 100 + day
-				fmt.Println(date)
-				if cfg.Dataconf.KLine{
-					GetKData(hTdb, cfg.Influxconf.ChWindCode, cfg.Influxconf.ChMarket, date, date, C.CYC_MINUTE, 0, 0, 1, c)
+		}
+	}else {
+		for year := startYear; year < endYear + 1; year++ {
+			if year == endYear {
+				Month = endMonth
+			} else {
+				Month = 12
+			}
+			for month := startMonth; month < Month + 1; month ++ {
+				if month == endMonth {
+					Day = endDay
+				} else {
+					Day = 31
 				}
-				if cfg.Dataconf.Tick {
-					GetTickData(hTdb, cfg.Influxconf.ChWindCode, cfg.Influxconf.ChMarket, date, c); //带买卖盘的tick				//tick
+				for day := startDay; day < Day + 1; day++ {
+					date := year * 10000 + month * 100 + day
+					if cfg.Dataconf.KLine {
+						GetKData(hTdb, cfg.Influxconf.ChWindCode, cfg.Influxconf.ChMarket, date, date, C.CYC_DAY, 0, 0, 1, c)
+					}
+					if cfg.Dataconf.Tick {
+						GetTickData(hTdb, cfg.Influxconf.ChWindCode, cfg.Influxconf.ChMarket, date, c); //带买卖盘的tick				//tick
+					}
+					if cfg.Dataconf.Transaction {
+						GetTransaction(hTdb, cfg.Influxconf.ChWindCode, cfg.Influxconf.ChMarket, date, c); //Transaction
+					}
+					if cfg.Dataconf.Order {
+						GetOrder(hTdb, cfg.Influxconf.ChWindCode, cfg.Influxconf.ChMarket, date, c); //Order
+					}
+					if cfg.Dataconf.OrderQueue {
+						GetOrderQueue(hTdb, cfg.Influxconf.ChWindCode, cfg.Influxconf.ChMarket, date, c); //OrderQueue
+					}
+					// UseEZFFormula(hTdb);
 				}
-				if cfg.Dataconf.Transaction {
-					GetTransaction(hTdb, cfg.Influxconf.ChWindCode, cfg.Influxconf.ChMarket, date, c); //Transaction
-				}
-				if cfg.Dataconf.Order {
-					GetOrder(hTdb, cfg.Influxconf.ChWindCode, cfg.Influxconf.ChMarket, date, c); //Order
-				}
-				if cfg.Dataconf.OrderQueue {
-					GetOrderQueue(hTdb, cfg.Influxconf.ChWindCode, cfg.Influxconf.ChMarket, date, c); //OrderQueue
-				}
-				// UseEZFFormula(hTdb);
 			}
 		}
 	}
@@ -378,6 +388,7 @@ func array2str4C(arr [50]C.int, len C.int) string {
 	}
 	return str
 }
+
 func timeGenerateor(nDate int, nTime int) time.Time {
 	strDate := strconv.Itoa(nDate)
 	strTime := strconv.Itoa(nTime)
@@ -415,7 +426,7 @@ func length256(arr [256]byte) int{
 	return i
 }
 
-func GetCodeTable(hTdb C.THANDLE, szMarket string)([9000]Code_Table, int){
+func GetCodeTable(hTdb C.THANDLE, szMarket string)([11000]Code_Table, int){
 	var (
 		pCodetable *C.TDBDefine_Code = nil
 		pCount C.int
@@ -426,31 +437,30 @@ func GetCodeTable(hTdb C.THANDLE, szMarket string)([9000]Code_Table, int){
 		fmt.Println("无代码表！")
 		return
 	}*/
-	var f    *os.File
+	/*var f    *os.File
 	var filename = "./output1.txt";
 	var err1   error;
 	os.Remove(filename)
 	if checkFileIsExist(filename) {  //如果文件存在
 		f, err1 = os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, os.ModeAppend)  //打开文件
-		//fmt.Println("文件存在");
 	}else {
 		f, err1 = os.Create(filename)  //创建文件
-		//fmt.Println("文件不存在");
 	}
-	check(err1)
-	var Table [9000]Code_Table
+	check(err1)*/
+	var Table [11000]Code_Table
 	/*fmt.Println("---------------------------Code Table--------------------")
 	fmt.Printf("收到代码表项数：%d，\n\n",int64(pCount))*/
 	//输出
 	tmpPtr := uintptr(unsafe.Pointer(pCodetable))
 	sizeOf := unsafe.Sizeof(*pCodetable)
+	fmt.Println(int(pCount))
 	if outPutTable {
 		for i:=0; i<int(pCount);i+=1 {
 			pCt := (*C.TDBDefine_Code)(unsafe.Pointer(tmpPtr))
 			//code
 			chWindCode := Char2byte(uintptr(unsafe.Pointer(&pCt.chWindCode)),unsafe.Sizeof(pCt.chWindCode[0]),len(pCt.chWindCode))
 			//fmt.Printf("万得代码 chWindCode:%s \n", chWindCode)
-			_, err1 := io.WriteString(f, string(chWindCode[:length256(chWindCode)])+"\t")
+			//_, err1 = io.WriteString(f, string(chWindCode[:length256(chWindCode)])+"\t")
 			Table[i].chWindCode = string(chWindCode[:length256(chWindCode)])
 			//chWindCode
 			chCode := Char2byte(uintptr(unsafe.Pointer(&pCt.chCode)),unsafe.Sizeof(pCt.chCode[0]),len(pCt.chCode))
@@ -460,21 +470,21 @@ func GetCodeTable(hTdb C.THANDLE, szMarket string)([9000]Code_Table, int){
 			//chMarket
 			chMarket := Char2byte(uintptr(unsafe.Pointer(&pCt.chMarket)),unsafe.Sizeof(pCt.chMarket[0]),len(pCt.chMarket))
 			//fmt.Printf("市场代码 chMarket:%s \n", chMarket)
-			_, err1 = io.WriteString(f, string(chMarket[:length256(chMarket)])+"\t")
+			//_, err1 = io.WriteString(f, string(chMarket[:length256(chMarket)])+"\t")
 			Table[i].chMarket = string(chMarket[:length256(chMarket)])
 			//chName
 			//chName := Char2byte(uintptr(unsafe.Pointer(&pCt.chCNName)),unsafe.Sizeof(pCt.chCNName[0]),len(pCt.chCNName))
 			//fmt.Printf("证券中文名称 chCNName:%s \n", chName)
 			//_, err1 = io.WriteString(f,string(chName[:length256(chName)])+"\t")
-			check(err1)
+
 			//chENName
 			//chENName := Char2byte(uintptr(unsafe.Pointer(&pCt.chENName)),unsafe.Sizeof(pCt.chENName[0]),len(pCt.chENName))
 			//fmt.Printf("证券英文名称 chENName:%s \n", chENName)
 
 			//fmt.Printf("证券类型 nType:%d \n", pCt.nType)
-			//_, err1 = io.WriteString(f,strconv.Itoa((int(int32(pCt.nType))))+"\t")
-			check(err1)
+			//check(err1)
 			Table[i].codeType = int32(pCt.nType)
+			//_, err1 = io.WriteString(f,strconv.Itoa((int(int32(pCt.nType))))+"\t")
 			//fmt.Println("----------------------------------------")
 			tmpPtr += sizeOf * 1
 			//io.WriteString(f,"\n")
@@ -961,7 +971,6 @@ func GetOrderQueue(hTdb C.THANDLE, szCode string, szMarketKey string, nDate int,
 	C.TDB_Free(ptr)
 }
 
-
 //指标公式
 /*
 func UseEZFFormula(hTdb C.THANDLE) {
@@ -984,8 +993,8 @@ func UseEZFFormula(hTdb C.THANDLE) {
 	sizeOf := unsafe.Sizeof(*pEZFItem)
 	for i:=0; i<int(nItems); i++{
 		//pEZF := (*C.TDBDefine_FormulaItem)(unsafe.Pointer(tmpPtr))
-		*/
-/*fmt.Printf("公式名称：%s, 参数:%s \n",
+
+	fmt.Printf("公式名称：%s, 参数:%s \n",
 			Char2byte(uintptr(unsafe.Pointer(&pEZF.chFormulaName)),unsafe.Sizeof(pEZF.chFormulaName[0]),len(pEZF.chFormulaName)),
 			Char2byte(uintptr(unsafe.Pointer(&pEZF.chParam)),unsafe.Sizeof(pEZF.chParam[0]),len(pEZF.chParam)),
 			)*//*

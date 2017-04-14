@@ -24,11 +24,11 @@
 
     "Password":"mingshi888",
 
-    "StartTime":"20170101",
+    "StartTime":"20160101",
 
-    "EndTime":"20170231",
+    "EndTime":"20161231",
 
-    "ChWindCode":"000001.SZ",
+    "ChWindCode":"all",
 
     "ChMarket":"SZ-2-0"
   },
@@ -37,12 +37,12 @@
 
     "KLine":true,
 
-    "Tick":true,
+    "Tick":false,
 
-    "Transaction":true,
+    "Transaction":false,
 
-    "Order":true,
+    "Order":false,
 
-    "OrderQueue":true
+    "OrderQueue":false
   }
 }
